@@ -24,6 +24,9 @@
 
 #include <stdlib.h>
 
+#include <time.h>
+#include <errno.h>
+
 #include "sqlite3.h"
 #include "redismodule.h"
 #include "rmutil/util.h"
@@ -143,9 +146,19 @@ Queue* make_queue(){
 }
 
 int push(Queue* queue, Query* query){
-  printf("\tPUSH: \tQueue: %p\n", queue);
-  printf("\tPUSH: \tMutex: %p = Cond: %p\n", queue->mutex, queue->cond);
+  printf("\tPUSH: \tQueue: %p\n", (void *)queue);
+  printf("\tPUSH: \tQueue->head: %p\n", (void *)queue->head);
+  printf("\tPUSH: \tMutex: %p = Cond: %p\n", (void *)&queue->mutex, (void *)&queue->cond);
   printf("\tPUSH:\tAbout to get the mutex\n");
+
+  printf("\tPUSH:\t Query text: %s\n", query->query);
+
+  if (queue->head == NULL){
+    printf("\tPUSH: \tQueue is EMPTY\n");
+  } else {
+    printf("\tPUSH: \tQueue is NOT empty\n");
+  }
+
   pthread_mutex_lock(&(queue->mutex));
   printf("\tPUSH:\tGot the mutex\n");
   
@@ -166,21 +179,43 @@ int push(Queue* queue, Query* query){
   printf("\tPUSH:\tSignal release with code %d\n", rc);
   pthread_mutex_unlock(&(queue->mutex));
   printf("\tPUSH:\tRelease mutex\n");
+
+  if (queue->head != NULL){
+    printf("\tPUSH: \tQueue is not empty\n");
+  }
+
   return 1;
 }
 
 Query* pop(Queue* queue){
   Query* query;
   
-  printf("\tPOP: \tQueue: %p\n", queue);
-  printf("\tPOP: \tMutex: %p = Cond: %p\n", queue->mutex, queue->cond);
+  struct timespec timeToWait;
+  struct timeval now;
+  printf("\tPOP: \tQueue: %p\n", (void *)queue);
+  printf("\tPOP: \tMutex: %p = Cond: %p\n", (void *)&queue->mutex, (void *)&queue->cond);
  
   pthread_mutex_lock(&(queue->mutex));
   printf("\tPOP: \tMutex Locked\n");
   while (queue->head == NULL){
-    printf("\t\tAbout to wait in POP\n");
-    pthread_cond_wait(&(queue->cond), &(queue->mutex));
-    printf("\t\tReceived the signal and unblocked \n");
+    
+    printf("\tPOP: \tQueue: %p\n", (void *)queue);
+    printf("\tPOP: \tQueue->head: %p\n", (void *)queue->head);
+ 
+    gettimeofday(&now,NULL);
+
+    timeToWait.tv_sec = now.tv_sec + 5;
+    timeToWait.tv_nsec = now.tv_usec;
+
+    printf("\tPOP: \tAbout to wait\n");
+    
+    int rc = pthread_cond_timedwait(&(queue->cond), &(queue->mutex), &timeToWait);
+    if (rc == ETIMEDOUT){
+      printf("\tPOP: \tTimeout wakeup\n");
+    } else {
+      printf("\tPOP: \tReturn code for wait: %d\n", rc);
+      printf("\tPOP: \tReceived the signal and unblocked \n");
+    }
   }
   printf("\tPOP: \tGot the mutex\n");
   query = queue->head;
@@ -354,6 +389,9 @@ void exec_func(Query *q){
   /*
    * Deallocate Query: q
    * */
+
+  printf("exec\t Return from exec_func\n");
+
   return;
 }
 
@@ -362,11 +400,12 @@ void print_thread_id(){
 	printf("\n\n\nThread id: %d\n\n\n", id);
 }
 
-void* start_db_thread(Queue *q){
-  Queue *queue = (Queue*) q;
+void* start_db_thread(void *q){
+  Queue *queue =  q;
   print_thread_id();
 
-  printf("Queue: %p", q);
+  printf("\tSTART: \tQueue: %p\n", (void*)queue);
+  printf("\tSTART: \tQueue->head: %p\n", (void*)queue->head);
 
   Query* query;
 
@@ -390,11 +429,7 @@ int createDB(RedisModuleCtx *ctx, RedisModuleString *key_name, const char *path)
  
   DB *DB = RedisModule_Alloc(sizeof(DB));
   DB->name = RedisModule_Alloc(sizeof(char) * 124); //TODO count
-  DB->queue = make_queue();
-  
-  printf("\tDBC: \tDB: %p = Queue: %p\n", DB, DB->queue);
-  printf("\tDBC: \tMutex: %p = Cond: %p\n", DB->queue->mutex, DB->queue->cond);
-  
+ 
   if (NULL == path){
     strcpy(DB->name, ":memory:");
     rc = sqlite3_open(":memory:", &DB->connection);
@@ -402,7 +437,13 @@ int createDB(RedisModuleCtx *ctx, RedisModuleString *key_name, const char *path)
     strcpy(DB->name, path);
     rc = sqlite3_open(path, &DB->connection);
   }
-
+  
+  Queue *q = make_queue();
+  DB->queue = q;
+  
+  printf("\tDBC: \tDB: %p = Queue: %p\n", (void *)DB, (void *)DB->queue);
+  printf("\tDBC: \tMutex: %p = Cond: %p\n", (void *)&DB->queue->mutex, (void *)&DB->queue->cond);
+ 
   if (SQLITE_OK != rc){
     RedisModule_CloseKey(key);
     return RedisModule_ReplyWithError(ctx, "ERR - Problem opening the database");
@@ -412,25 +453,27 @@ int createDB(RedisModuleCtx *ctx, RedisModuleString *key_name, const char *path)
   qtest->query = "create table test (a int);";
   qtest->connection = DB->connection;
   qtest->blocked_client = NULL;
-    
-  pthread_create(&(DB->executor), NULL, start_db_thread, DB->queue);
+
+  pthread_t t;
+
+  pthread_create(&t, NULL, start_db_thread, &q);
   
   if (REDISMODULE_OK == RedisModule_ModuleTypeSetValue(
 	key, DB_Type, DB)){
     
     RedisModule_CloseKey(key);
-    key = RedisModule_OpenKey(ctx, key_name, REDISMODULE_WRITE);
-    DB = RedisModule_ModuleTypeGetValue(key);
+    // key = RedisModule_OpenKey(ctx, key_name, REDISMODULE_WRITE);
+    // DB = RedisModule_ModuleTypeGetValue(key);
     
-    printf("\tDBC2: \tDB: %p = Queue: %p\n", &(DB), DB->queue);
-    printf("\tDBC2: \tMutex: %p = Cond: %p\n", &(DB->queue->mutex), &(DB->queue->cond));
+    printf("\tDBC2: \tDB: %p = Queue: %p\n", (void *)&(DB), (void *)DB->queue);
+    printf("\tDBC2: \tMutex: %p = Cond: %p\n", (void *)&(DB->queue->mutex), (void *)&(DB->queue->cond));
   
 
-    //sleep(1);
-    //push(DB->queue, qtest);
+    // sleep(1);
+    // push(DB->queue, qtest);
  
  
-    RedisModule_CloseKey(key);
+    // RedisModule_CloseKey(key);
     
     return RedisModule_ReplyWithSimpleString(ctx, "OK");
   } else {
@@ -596,7 +639,6 @@ void free_privdata(void *privdata){
 int ExecCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc){
   RedisModuleKey *key;
   int key_type;
-  DB* DB;
 
   if (3 != argc){
     return RedisModule_WrongArity(ctx);
@@ -612,10 +654,10 @@ int ExecCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc){
     return RedisModule_ReplyWithError(ctx, REDISMODULE_ERRORMSG_WRONGTYPE);
   }
   
-  DB = RedisModule_ModuleTypeGetValue(key);
+  DB* DB = RedisModule_ModuleTypeGetValue(key);
   
-  printf("\tEXEC: \tDB: %p = Queue: %p\n", DB, DB->queue);
-  printf("\tEXEC: \tMutex: %p = Cond: %p\n", DB->queue->mutex, DB->queue->cond);
+  printf("\tEXEC: \tDB: %p = Queue: %p\n", (void*)DB, (void*)DB->queue);
+  printf("\tEXEC: \tMutex: %p = Cond: %p\n", (void*)&DB->queue->mutex, (void*)&DB->queue->cond);
 
   RedisModuleBlockedClient *bc =
 	  RedisModule_BlockClient(ctx, reply_func, timeout_func, free_privdata, 10 * 1000);
