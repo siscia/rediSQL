@@ -29,7 +29,7 @@
             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
             })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-            ga('create', 'UA-116709819-1', 'RediSQL');
+            ga('create', 'UA-116709819-1', 'auto');
             ga('send', 'pageview');
         </script>
         
@@ -76,7 +76,28 @@
                 
                 
                     <li >
-                        <a href="motivations/">Motivations</a>
+                        <a href="pro/">Pro</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="motivations/">Motivations</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="pro_motivations/">PRO Motivations</a>
+</li>
+
+                        
+                        </ul>
                     </li>
                 
                 
@@ -88,6 +109,30 @@
                             
 <li >
     <a href="blog/analytics/">Analytics</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="blog/JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="blog/performances/">Double performances of RediSQL going zero copy</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="blog/release_0.5.0/">Release 0.5.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="blog/release_0.6.0/">Release 0.6.0</a>
 </li>
 
                         
@@ -138,9 +183,7 @@
     
         <li class="main active"><a href="#redisql">RediSQL</a></li>
         
-            <li><a href="#motivation">Motivation</a></li>
-        
-            <li><a href="#sustainable-open-source">Sustainable Open Source</a></li>
+            <li><a href="#get-started">Get Started</a></li>
         
     
         <li class="main "><a href="#overview">Overview</a></li>
@@ -151,12 +194,21 @@
         
             <li><a href="#statements">Statements</a></li>
         
+            <li><a href="#query">Query</a></li>
+        
     
         <li class="main "><a href="#persistency">Persistency</a></li>
         
             <li><a href="#rdb">RDB</a></li>
         
             <li><a href="#aof">AOF</a></li>
+        
+            <li><a href="#obtain">Obtain</a></li>
+        
+            <li><a href="#motivation">Motivation</a></li>
+        
+    
+        <li class="main "><a href="#pro">PRO</a></li>
         
     
     </ul>
@@ -165,15 +217,90 @@
 
 <h1 id="redisql">RediSQL</h1>
 <p><a href="https://github.com/RedBeardLab/rediSQL">RediSQL</a> is a Redis module that embeds a fully functional SQLite database.</p>
-<p>At the best of our knowledge is the only system that provides SQL capabilities while being very fast so to be used as cache, simple to integrate with any programming language, since it can be used by every redis client, and with very very low maintenance.</p>
-<p>Moreover, for small, not critical services, it can also be used as main database, it can store data not only in memory but also on file and it can also use the same persistency mechanisms of redis itself.</p>
-<h2 id="motivation">Motivation</h2>
-<p>The main motivation behind the project is to provide a quick and hands-off environment to store structured data.</p>
-<p>It also turns out that RediSQL is a great way to cache your content and data in a more structured way.</p>
-<p>Anyway, the main history and motivation of the project are explained <a href="motivations/">in this page.</a></p>
-<h2 id="sustainable-open-source">Sustainable Open Source</h2>
-<p>The project is based on the idea of sustainable Open Source.</p>
-<p>The project provides two versions, an open source one, which is enough for most simple projects, and a PRO version that provides features required from companies and enterprises.</p>
+<p>At the best of our knowledge is the only system that provides SQL capabilities while being very fast so to be used as a cache, simple to integrate with any programming language, since it can be used by every redis client, and with very very low maintenance.</p>
+<p>Moreover, it can also be used as the main database, it can store data not only in memory but also on file and it can also use the same persistence mechanisms of redis itself.</p>
+<h2 id="get-started">Get Started</h2>
+<p>You can download the module directly <a href="https://github.com/RedBeardLab/rediSQL/releases">from github releases</a>.</p>
+<p>You can start the module with:</p>
+<pre><code class="bash">./redis-server --loadmodule rediSQL_&lt;version&gt;.so
+</code></pre>
+
+<p>After starting redis with the rediSQL module it will be just the redis you learn to love:</p>
+<pre><code class="bash">$ ~/redis-4.0-rc1/src/redis-cli 
+127.0.0.1:6379&gt; 
+127.0.0.1:6379&gt; SET A 3
+OK
+127.0.0.1:6379&gt; GET A
+&quot;3&quot;
+</code></pre>
+
+<p>But you will also able to use all the API described below:</p>
+<pre><code>127.0.0.1:6379&gt; REDISQL.CREATE_DB DB
+OK
+# Start creating a table on the default DB
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;CREATE TABLE foo(A INT, B TEXT);&quot;
+DONE
+# Insert some data into the table
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO foo VALUES(3, 'bar');&quot;
+OK
+# Retrieve the data you just inserted
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;SELECT * FROM foo;&quot;
+1) 1) (integer) 3
+   2) &quot;bar&quot;
+# Of course you can make multiple tables
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;CREATE TABLE baz(C INT, B TEXT);&quot;
+OK
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO baz VALUES(3, 'aaa');&quot;
+OK
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO baz VALUES(3, 'bbb');&quot;
+OK
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO baz VALUES(3, 'ccc');&quot;
+OK
+# And of course you can use joins
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;SELECT * FROM foo, baz WHERE foo.A = baz.C;&quot;
+
+1) 1) (integer) 3
+   2) &quot;bar&quot;
+   3) (integer) 3
+   4) &quot;aaa&quot;
+2) 1) (integer) 3
+   2) &quot;bar&quot;
+   3) (integer) 3
+   4) &quot;bbb&quot;
+3) 1) (integer) 3
+   2) &quot;bar&quot;
+   3) (integer) 3
+   4) &quot;ccc&quot;
+127.0.0.1:6379&gt; 
+</code></pre>
+
+<p>Also the <code>LIKE</code> operator is included:</p>
+<pre><code>127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;CREATE TABLE text_search(t TEXT);&quot;
+OK
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO text_search VALUES('hello');&quot;
+OK
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO text_search VALUES('banana');&quot;
+OK
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO text_search VALUES('apple');&quot;
+OK
+127.0.0.1:6379&gt; 
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;SELECT * FROM text_search WHERE t LIKE 'h_llo';&quot;
+1) 1) &quot;hello&quot;
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;SELECT * FROM text_search WHERE t LIKE '%anana';&quot;
+1) 1) &quot;banana&quot;
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO text_search VALUES('anana');&quot;
+OK
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;SELECT * FROM text_search;&quot;
+1) 1) &quot;hello&quot;
+2) 1) &quot;banana&quot;
+3) 1) &quot;apple&quot;
+4) 1) &quot;anana&quot;
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;SELECT * FROM text_search WHERE t LIKE 'a%';&quot;
+1) 1) &quot;apple&quot;
+2) 1) &quot;anana&quot;
+</code></pre>
+
+<p>Now you can create tables, insert data on those tables, make queries, remove elements, everything.</p>
 <h1 id="overview">Overview</h1>
 <p>In this section, we are going to explore the main concepts in the module.</p>
 <p>There is another section of the website, <a href="references/">the reference</a>, that explore every single command that the module provides giving a deeper explanation of every detail.</p>
@@ -191,9 +318,13 @@
 <p>When you execute an SQLite query, the text is compiled to a binary code, this binary code is then executed against the database and the result provide an answer.
 The phase of compilation can be quite expensive, but if you always execute the same statements (think about <code>inserts</code>), it can be avoided.</p>
 <p>When you use <a href="references/#redisqlcreate_statement"><code>REDISQL.CREATE_STATEMENT</code></a> your statement is compiled, then when you execute it using <a href="references/#redisqlexec_statement"><code>REDISQL.EXEC_STATEMENT</code></a> it is not re-compiled but we use the pre-compiled one. It seems a trivial change but it will really speed up some workload.</p>
-<p>Statements can also be used as an interface for different application using the same RediSQL instance.</p>
-<p>Once you define the interface of the statement and its behavior, then you are free to change it's implementation while maintaining all the legacy code working.
+<p>Statements can also be used as an interface for different applications using the same RediSQL instance.</p>
+<p>Once you define the interface of the statement and its behaviour, then you are free to change it's implementation while maintaining all the legacy code working.
 This is quite useful especially if you have several services using the same RediSQL instance.</p>
+<h2 id="query">Query</h2>
+<p>In most databases there are statements that modify the data and queries that simply read.</p>
+<p>Of course, just reading, is usually a faster and simpler operation than modify the data. In order to take advantages of this, we provide a different command <a href="references/#redisqlquery"><code>REDISQL.QUERY</code></a> and <a href="references/#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a> that constraint you to don't modify the data.</p>
+<p>These commands allow you to have slaves/replicas serves query and to balance some load off the master node for better speed and reliability.</p>
 <h1 id="persistency">Persistency</h1>
 <p>The module in the community version implements only RDB. However, the PRO version provides also AOF and replication.</p>
 <h2 id="rdb">RDB</h2>
@@ -201,8 +332,26 @@ This is quite useful especially if you have several services using the same Redi
 <p>When Redis starts to save the RDB file the status of the database get serialized and written, along with all the other information, in the RDB file.</p>
 <h2 id="aof">AOF</h2>
 <p>AOF replication is provided only in the PRO edition.</p>
-<p>At the moment all the commands are replicated, this is quite a waste and we are moving to replicate only the commands that actually modify the codebase.</p>
-<p>With AOF replication you also get instance replication that allows replicating the same dataset into different Redis instances.</p></div>
+<p>All the commands are replicated, but the read-only ones.</p>
+<p>With AOF replication you also get instance replication that allows replicating the same dataset into different Redis instances in a master/slave fashion.</p>
+<h2 id="obtain">Obtain</h2>
+<p>There are <strong>two version</strong> of the software, a "community", completely open source version and a PRO version that comes with <strong>more features and support plan.</strong></p>
+<p>Both versions can be <a href="https://plasso.com/s/epp4GbsJdp-redisql"><strong>obtained in the store.</strong></a></p>
+<p>For the community version, you can just download it, we ask for a small donation if you can support the project but feel free to just input 0€ and download it.</p>
+<p>For the PRO version you need to <a href="https://plasso.com/s/epp4GbsJdp-redisql/signup/"><strong>sign up here</strong></a>, after you signed up you will be able to download the software.</p>
+<p>A detailed coverage of the PRO version <a href="pro/">is provided here</a></p>
+<p>Finally you can also obtain the software from <a href="https://github.com/RedBeardLab/rediSQL/releases">github releases</a></p>
+<h2 id="motivation">Motivation</h2>
+<p>The main motivation behind the project is to provide a quick and hands-off environment to store structured data.</p>
+<p>It also turns out that RediSQL is a great way to cache your content and data in a more structured way.</p>
+<p>The main history and motivation of the project are explained <a href="motivations/">in this page.</a></p>
+<h1 id="pro">PRO</h1>
+<p>The PRO edition is based on the Open Source one, however, it provides one more class of commands that are necessary for business or where rediSQL is a critical piece of the infrastructure.</p>
+<p>Every command, but <code>REDISQL.CREATE_DB</code>, blocks the clients and it is executed in the background by a different thread.</p>
+<p>With the PRO version, we also provide the <code>.NOW</code> commands that are executed immediately without blocking the client.</p>
+<p>Every command in the PRO version provides the <code>.NOW</code> variant, but please refer to the <a href="references/">reference</a>.</p>
+<p>Moreover, the PRO version also provides AOF replication, that, indeed, necessitate of commands that don't block the clients.</p>
+<p>More information about the PRO version are available <a href="pro/">here.</a></p></div>
             
         </div>
 
@@ -249,5 +398,5 @@ This is quite useful especially if you have several services using the same Redi
 
 <!--
 MkDocs version : 0.14.0
-Build Date UTC : 2018-03-30 21:09:47.578503
+Build Date UTC : 2018-08-05 07:44:20.644103
 -->

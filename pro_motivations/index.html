@@ -7,14 +7,14 @@
         
         
         
-        <link rel="shortcut icon" href="./img/favicon.ico">
+        <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>RediSQL</title>
+	<title>PRO Motivations - RediSQL</title>
 
-        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link href="./css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="./css/highlight.css">
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -53,7 +53,7 @@
             
 
             <!-- Main title -->
-            <a class="navbar-brand" href=".">RediSQL</a>
+            <a class="navbar-brand" href="..">RediSQL</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -64,36 +64,36 @@
                 
                 
                     <li >
-                        <a href=".">Overview</a>
+                        <a href="..">Overview</a>
                     </li>
                 
                 
                 
                     <li >
-                        <a href="references/">References</a>
+                        <a href="../references/">References</a>
                     </li>
                 
                 
                 
                     <li >
-                        <a href="pro/">Pro</a>
+                        <a href="../pro/">Pro</a>
                     </li>
                 
                 
                 
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
                             
 <li >
-    <a href="motivations/">Motivations</a>
+    <a href="../motivations/">Motivations</a>
 </li>
 
                         
                             
-<li >
-    <a href="pro_motivations/">PRO Motivations</a>
+<li class="active">
+    <a href="./">PRO Motivations</a>
 </li>
 
                         
@@ -108,31 +108,31 @@
                         
                             
 <li >
-    <a href="blog/analytics/">Analytics</a>
+    <a href="../blog/analytics/">Analytics</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
+    <a href="../blog/JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/performances/">Double performances of RediSQL going zero copy</a>
+    <a href="../blog/performances/">Double performances of RediSQL going zero copy</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/release_0.5.0/">Release 0.5.0</a>
+    <a href="../blog/release_0.5.0/">Release 0.5.0</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/release_0.6.0/">Release 0.6.0</a>
+    <a href="../blog/release_0.6.0/">Release 0.6.0</a>
 </li>
 
                         
@@ -150,13 +150,13 @@
                     </a>
                 </li>
                 
-                    <li class="disabled">
-                        <a rel="next" >
+                    <li >
+                        <a rel="next" href="../motivations/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li class="disabled">
-                        <a rel="prev" >
+                    <li >
+                        <a rel="prev" href="../blog/analytics/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -178,15 +178,66 @@
 
         <div class="container">
             
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#redisql-pro-motivation">RediSQL PRO Motivation</a></li>
+        
+            <li><a href="#tldr">tl;dr;</a></li>
+        
+            <li><a href="#necessity-to-make-the-project-sustainable">Necessity to make the project sustainable</a></li>
+        
+            <li><a href="#our-approach">Our approach</a></li>
+        
+            <li><a href="#benefits-for-organizations-and-for-the-community">Benefits for organizations and for the community</a></li>
+        
+            <li><a href="#about-the-cost">About the cost</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
 
-    <div class="row-fluid">
-      <div id="main-content" class="span12">
-        <h1 id="404-page-not-found" style="text-align: center">404</h1>
-        <p style="text-align: center"><strong>Page not found</strong></p>
-      </div>
-    </div>
-
-
+<h1 id="redisql-pro-motivation">RediSQL PRO Motivation</h1>
+<p>This document explains why we decide to offer a commercial PRO version alongside the free and open source community version.</p>
+<h2 id="tldr">tl;dr;</h2>
+<ul>
+<li>We sell a PRO version to make the project sustainable.</li>
+<li>You can buy the PRO version <a href="https://plasso.com/s/epp4GbsJdp-redisql/signup/"><strong>here.</strong></a></li>
+<li>We offer custom license term if your company need one.</li>
+</ul>
+<h2 id="necessity-to-make-the-project-sustainable">Necessity to make the project sustainable</h2>
+<p>We believe that in order to provide the most value Open Source should be sustainable.</p>
+<p>Design, implementation and testing are all necessary and valuable steps of any software project, but they do require time.</p>
+<p>Open sources projects that are able to really deliver value need to find a way to remunerate the time of their maintainers.</p>
+<p>Some successful open source projects are backed by companies (Firefox, React, etc...), other sell supports (mongodb, vernemq, etc...) and other plug their software into a commercial offer (npm, docker, elatic, etc...).</p>
+<h2 id="our-approach">Our approach</h2>
+<p>In order to provide a open source, our approach is to offer two different product, a completely free open source one and a PRO version.</p>
+<p>Selling the PRO version allows us to dedicate most of the time to the project, having a good work-life balance, enjoy time with our girlfriends, wives or kids and being productive developers and technical writers.</p>
+<h2 id="benefits-for-organizations-and-for-the-community">Benefits for organizations and for the community</h2>
+<p>Moreover, we believe that this is the best way to serve our users and the community.</p>
+<p>Indeed, we are able to maintain the project through the years so that any company or organization that decide to use our product will know that in 3/4/5 years we will still be there to help them if any problem should arise.</p>
+<p>On top of this also single programmers, very small start-ups or small companies will benefit from us keeping maintaining the product in its two form, community and pro.</p>
+<p>You can support us and buy the commercial version of this product <a href="https://plasso.com/s/epp4GbsJdp-redisql/signup/">on this web page.</a></p>
+<p>We also offer <strong>custom license terms</strong> if your organization needs one.</p>
+<h2 id="about-the-cost">About the cost</h2>
+<p>We set up the cost (€990 / year) to make it a bargain for every company that actually uses it.</p>
+<p>Considering the amount of time necessary to replicate the PRO features:</p>
+<ol>
+<li>Understand the working principle of Redis</li>
+<li>Understand SQLite and how to leverage it</li>
+<li>Understand the Redis Module API</li>
+<li>Design the product</li>
+<li>Implement it</li>
+<li>Test it</li>
+<li>Document it</li>
+<li>Maintain it</li>
+</ol>
+<p>Multiply it by the hourly rate of a software engineer (~100 €/hours).</p>
+<p>It is clear that after a little more than a single day of work our product will be a net positive for your organization.</p>
+<p>Moreover, the PRO version comes with <strong>support plan</strong> to help you extract the most value out of the product.</p>
+<p>Finally, we offer custom, business-friendly licenses if your business or lawyers need them.</p></div>
+            
         </div>
 
         <footer class="col-md-12">
@@ -195,12 +246,12 @@
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
 
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script>
-        <script>var base_url = '.';</script>
-        <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
-        <script src="./js/base.js"></script>
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
             <div class="modal-dialog">

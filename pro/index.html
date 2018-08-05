@@ -9,7 +9,7 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>Motivations - RediSQL</title>
+	<title>Pro - RediSQL</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -75,19 +75,19 @@
                 
                 
                 
-                    <li >
-                        <a href="../pro/">Pro</a>
+                    <li class="active">
+                        <a href="./">Pro</a>
                     </li>
                 
                 
                 
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
                             
-<li class="active">
-    <a href="./">Motivations</a>
+<li >
+    <a href="../motivations/">Motivations</a>
 </li>
 
                         
@@ -151,12 +151,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../pro/">
+                        <a rel="next" href="../references/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../pro_motivations/">
+                        <a rel="prev" href="../motivations/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -181,46 +181,52 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#motivation">Motivation</a></li>
+        <li class="main active"><a href="#redisql-pro">RediSQL PRO</a></li>
         
-            <li><a href="#my-personal-use-case">My personal use case</a></li>
-        
-            <li><a href="#why-redisql">Why RediSQL</a></li>
-        
-            <li><a href="#possible-uses">Possible uses</a></li>
+            <li><a href="#main-difference">Main difference</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="motivation">Motivation</h1>
-<p>This document explains the motivations behind this redis module.</p>
-<h2 id="my-personal-use-case">My personal use case</h2>
-<p>As a lot of different open source projects, this module is born out of a personal issue that I was trying to solve.</p>
-<p>I was developing a very simple application using a microservice architecture, each service needed to be stopped and updated at will so it was mandatory to store all the state in an external application.</p>
-<p>Redis was perfect for this use case since it is very simple to operate, you could get away simply setting your level of persistence, extremely stable, very performant and there are bindings ready for basically any programming language.</p>
-<p>However, the application started to grow in terms of complexity and soon I realized that having a small SQL engine would have saved me a lot of complexity in my code while delivering better performances.</p>
-<p>At that time I had only the following options:</p>
-<ol>
-<li>Keep all the state in Redis, implementing by hand, or using some external library, whatever SQL-like transformation I needed.</li>
-<li>Bring in another piece inside my architecture, namely an SQL database.</li>
-</ol>
-<p>For some project it may be worth to immediately include an external dependency in the form of a database, but it brings up the cost of operating the infrastructure.</p>
-<p>Operating a database is quite complex, operating it in any organization costs in terms of human resources or, if you use managed services, directly in terms of money.</p>
-<p>Also, since all my state was kept only in Redis, introducing another "source of truth" would have complicated the code base.</p>
-<p>My project definitely didn't need the whole computing power of Postgresql or of MySQL, I didn't need the burden of operating it and definitely I wasn't in the condition to pay for managed services.</p>
-<h2 id="why-redisql">Why RediSQL</h2>
-<p>The goal of the module is to create a third alternative to the two mentioned above.</p>
-<p>I wanted this alternative to be as low maintenance as possible, keep a great level of security on the persistency of the data stored and to be easily deployed in most architectures.</p>
-<p>SQLite easily checks both the low maintenance and the high level of persistency requirements. Redis is already deployed in most architectures, either as a cache layer or as a database.</p>
-<p>Finally, merging the two project was just made possible by the introduction of the Redis modules.</p>
-<p>Hence, RediSQL was born.</p>
-<h2 id="possible-uses">Possible uses</h2>
-<p>RediSQL has been thought to be used as an in-memory SQL database, shared between multiple (micro-)services.</p>
-<p>However, RediSQL inherits the persistency capabilities of Redis, supporting RDB and AOF, and of SQLite, with the possibility to write directly on disk.</p>
-<p>Moreover, it basically never uses the main thread of Redis, hence it will not affect the performance of Redis itself.</p>
-<p>This makes RediSQL a reasonable solution to store and persist data in a small to a medium modern project. </p></div>
+<h1 id="redisql-pro">RediSQL PRO</h1>
+<p>This document explains the architecture and principle of working of RediSQL PRO.</p>
+<p>You can purchase RediSQL PRO, along with support <a href="https://plasso.com/s/epp4GbsJdp-redisql/signup/"><strong>here.</strong></a></p>
+<p>Motivation and details about the cost are <a href="../pro_motivations/">described here</a>.</p>
+<h2 id="main-difference">Main difference</h2>
+<p>The PRO version offers two main features: <strong>non blocking command</strong> and <strong>replication</strong></p>
+<h3 id="non-blocking-command">Non-blocking command</h3>
+<p>Most command in RediSQL, all but <code>REDISQL.CREATE_DB</code>, are blocking command.</p>
+<p>This means that Redis block the client, pass the command to a background thread that actually executed it and finally the result is returned to client unblocking it.</p>
+<p>This works great in most cases, the main thread of Redis is free of doing other work (like answering standard redis command), there is no difference from the client point of view and your machine can use more than the single thread of redis to work for you.</p>
+<p>However, sometimes you want to have non-blocking commands.</p>
+<p>The blocking command will be executed in the main redis thread, this means that no other works will be done by Redis while executing your command.</p>
+<p>We could expect the non-blocking command to be slightly faster (smaller latency) than the blocking one since there is no need for coordination between threads.</p>
+<p>Finally, non-blocking commands are necessary for replication.</p>
+<p>Non-blocking commands are invoke adding the <code>.NOW</code> suffix.</p>
+<p>As an example, instead of <code>REDISQL.EXEC</code> that is a blocking command you can use <code>REDISQL.EXEC.NOW</code> to use the non-blocking version.</p>
+<h4 id="when-to-use-non-blocking-commands">When to use non-blocking commands</h4>
+<p>Non-blocking command takes the priority over blocking one.</p>
+<p>Said so, generally, we are expecting users to use mostly the blocking commands.</p>
+<p>However, if you need a very quick insert or a very quick lookup, then you should use the non-blocking version.</p>
+<p>It is a bad idea to use non blocking commands for slow statements/query.</p>
+<p>This because while you are executing a non-blocking command the main redis thread cannot do anything else, this means it cannot answer other redis commands.</p>
+<h3 id="replication">Replication</h3>
+<p>Redis offers two main methods for persisting data on disk so that in case of power failure of disastrous failure your data are reasonably safe.</p>
+<p>RediSQL implement RDB persistency on the community version and AOF replication on the PRO version.</p>
+<p>For the details of this two method, I suggest to read the Redis Documentation <a href="https://redis.io/topics/persistence">on this page</a>.</p>
+<p>The mechanism behind AOF replication is exactly the same behind cluster replication used by redis. The same <strong>bytes</strong> used for AOF replication are also used for cluster replication, just send over different sockets.</p>
+<p>For details about cluster replication you can consult the official Redis Documentation on <a href="https://redis.io/topics/cluster-tutorial">cluster</a> and on <a href="https://redis.io/topics/replication">replication</a></p>
+<p>The PRO version, indeed, implements both AOF and cluster replication.</p>
+<h4 id="effective-use-of-replication">Effective use of Replication</h4>
+<p>In order to use replication effectively, you should understand a few simple concepts.</p>
+<p>If a command is replicated it means that it could be re-executed.</p>
+<p>It is <strong>vital</strong> to replicate commands that change the data you are storing, however, is pointless and wasteful to replicate commands that do not apply any change to the data.</p>
+<p>You definitely want to replicate every INSERTs, UPDATEs or DELETEs while you should avoid replicating SELECTs.</p>
+<p>Replicated commands are usually executed either when you are re-loading your dataset after some sort of failures or in slaves/replica with a train of other replicated commands is coming right after.</p>
+<p>Consider what happens if you replicate a big SELECT. RediSQL is going to execute it and it is going to take some time, this while your application is waiting for redis to restart or when a train of replicated commands are piling up in the slaves/replicas buffers. And all this just for discard the result of the SELECT itself.</p>
+<p>In order to avoid this effect is a good idea to use the query commands whenever possible (<a href="../references/#redisqlquery"><code>REDISQL.QUERY</code></a> and <a href="../references/#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a>), this command <strong>do not</strong> replicate and are marked as <code>readonly</code> which means that can be executed also on slaves/replicas providing interesting primitives of load balancing. (Eg. You could write on the master and read on the slaves.)</p></div>
             
         </div>
 

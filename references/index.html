@@ -29,7 +29,7 @@
             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
             })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-            ga('create', 'UA-116709819-1', 'RediSQL');
+            ga('create', 'UA-116709819-1', 'auto');
             ga('send', 'pageview');
         </script>
         
@@ -76,7 +76,28 @@
                 
                 
                     <li >
-                        <a href="../motivations/">Motivations</a>
+                        <a href="../pro/">Pro</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../motivations/">Motivations</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../pro_motivations/">PRO Motivations</a>
+</li>
+
+                        
+                        </ul>
                     </li>
                 
                 
@@ -88,6 +109,30 @@
                             
 <li >
     <a href="../blog/analytics/">Analytics</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/performances/">Double performances of RediSQL going zero copy</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/release_0.5.0/">Release 0.5.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/release_0.6.0/">Release 0.6.0</a>
 </li>
 
                         
@@ -111,7 +156,7 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../motivations/">
+                        <a rel="prev" href="../pro/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -144,13 +189,22 @@
         
             <li><a href="#redisqlexec">REDISQL.EXEC</a></li>
         
+            <li><a href="#redisqlquery">REDISQL.QUERY</a></li>
+        
             <li><a href="#redisqlcreate_statement">REDISQL.CREATE_STATEMENT</a></li>
         
             <li><a href="#redisqlexec_statement">REDISQL.EXEC_STATEMENT</a></li>
         
+            <li><a href="#redisqlquery_statement">REDISQL.QUERY_STATEMENT</a></li>
+        
             <li><a href="#redisqldelete_statement">REDISQL.DELETE_STATEMENT</a></li>
         
             <li><a href="#redisqlupdate_statement">REDISQL.UPDATE_STATEMENT</a></li>
+        
+    
+        <li class="main "><a href="#virtual-tables">Virtual Tables</a></li>
+        
+            <li><a href="#redisql_tables_brute_hash">REDISQL_TABLES_BRUTE_HASH</a></li>
         
     
     </ul>
@@ -160,7 +214,7 @@
 <h1 id="references">References</h1>
 <p>This document explains all the API that RediSQL provide to the users.</p>
 <p>For each command, it exposes first the name and then the syntax and finally a brief explanation of what is going on inside the code.</p>
-<p>Where is possible it provides also an estimate of the complexity since we are talking about databases not all queries have the same time and spatial complexity.</p>
+<p>Where is possible, it provides also an estimate of the complexity but since we are talking about databases not all queries have the same time and spatial complexity.</p>
 <p>Finally, if it is appropriate the document also provides several references to external material that the interested reader can use to understand better the dynamics of every and each command.</p>
 <h2 id="redisqlcreate_db">REDISQL.CREATE_DB</h2>
 <h4 id="redisqlcreate_db-db_key-path">REDISQL.CREATE_DB db_key [path]</h4>
@@ -188,12 +242,13 @@ If the file does not exist a new file will be created.</p>
 <li><a href="https://redis.io/commands/del">Redis <code>DEL</code></a></li>
 </ol>
 <h2 id="redisqlexec">REDISQL.EXEC</h2>
-<h4 id="redisqlexec-db_key-statement">REDISQL.EXEC db_key "statement"</h4>
+<h4 id="redisqlexecnow-db_key-statement">REDISQL.EXEC[.NOW] db_key "statement"</h4>
 <p>This command takes as input a Redis key created with <a href="#redisqlcreate_db"><code>REDISQL.CREATE_DB</code></a> and a statement string.</p>
 <p>Internally it transform the string into a <a href="https://sqlite.org/c3ref/stmt.html">sqlite statement</a> using <a href="https://sqlite.org/c3ref/prepare.html">sqlite3_prepare_v2</a>, execute it against the database, <a href="https://sqlite.org/c3ref/step.html">sqlite3_step</a>, and finally returns the results to the client.</p>
 <p>The compilation of the string into a statement and its execution happens in a different thread from the one used by Redis and so this command has a minimum impact on the overall Redis performance, however, it does block the client.</p>
 <p>This command is quite useful to execute <a href="https://sqlite.org/pragma.html">PRAGMA Statements</a>, for normal operations against the database is suggested to use <code>STATEMENTS</code>.</p>
 <p>Also, remember that there is only a single thread for database, execution of multiple <code>REDISQL.EXEC</code> against the same database will result in a serialization of the executions, one will be executed before the others.</p>
+<p>If you only need to query the database without modifying the data is a better idea to use <a href="#redisqlquery"><code>REDISQL.QUERY</code></a>.</p>
 <p><strong>Complexity</strong>: It depends entirely on the statement string. The use of a single thread for database is been chosen after several tests where the single thread configuration was faster than a multi-thread one. This is true in a write-intensive application and in a mixed write/read application.</p>
 <p><strong>See also</strong>:</p>
 <ol>
@@ -203,8 +258,27 @@ If the file does not exist a new file will be created.</p>
 <li><a href="https://sqlite.org/pragma.html">SQLite <code>PRAGMA</code>s</a></li>
 <li><a href="https://redis.io/topics/modules-blocking-ops">Redis Blocking Command</a></li>
 </ol>
+<h2 id="redisqlquery">REDISQL.QUERY</h2>
+<h4 id="redisqlquerynow-db_key-statement">REDISQL.QUERY[.NOW] db_key "statement"</h4>
+<p>This command behaves similarly to <a href="#redisqlexec"><code>REDISQL.EXEC</code></a> but it imposes an additional constraint on the statement it executes.</p>
+<p>It only executes the statement if it is a read-only operation, otherwise, it returns an error.</p>
+<p>A read-only operation is defined by the result of calling <a href="https://www.sqlite.org/c3ref/stmt_readonly.html"><code>sqlite3_stmt_readonly</code></a> on the compiled statement.</p>
+<p>The statement is executed if and only if <a href="https://www.sqlite.org/c3ref/stmt_readonly.html"><code>sqlite3_stmt_readonly</code></a> returns true.</p>
+<p>If you need to execute the same query over and over it is a good idea to create a statement and use <a href="#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a>.</p>
+<p><strong>Complexity</strong>: Similar to <a href="#redisqlexec"><code>REDISQL.EXEC</code></a>, however, if a statement is not read-only it is aborted immediately and it does return an appropriate error.</p>
+<p><strong>See also</strong>:</p>
+<ol>
+<li><a href="https://sqlite.org/c3ref/prepare.html">SQLite <code>sqlite3_prepare_v2</code></a></li>
+<li><a href="https://sqlite.org/c3ref/stmt.html">SQLite <code>statement</code> aka <code>sqlite3_stmt</code></a></li>
+<li><a href="https://sqlite.org/c3ref/step.html">SQLite <code>sqlite3_step</code></a></li>
+<li><a href="https://sqlite.org/pragma.html">SQLite <code>PRAGMA</code>s</a></li>
+<li><a href="https://redis.io/topics/modules-blocking-ops">Redis Blocking Command</a> </li>
+<li><a href="#redisqlexec"><code>REDISQL.EXEC</code></a></li>
+<li><a href="https://www.sqlite.org/c3ref/stmt_readonly.html">SQLite <code>sqlite3_stmt_readonly</code></a></li>
+<li><a href="#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a> </li>
+</ol>
 <h2 id="redisqlcreate_statement">REDISQL.CREATE_STATEMENT</h2>
-<h4 id="redisqlcreate_statement-db_key-stmt_identifier-statement">REDISQL.CREATE_STATEMENT db_key stmt_identifier "statement"</h4>
+<h4 id="redisqlcreate_statementnow-db_key-stmt_identifier-statement">REDISQL.CREATE_STATEMENT[.NOW] db_key stmt_identifier "statement"</h4>
 <p>This command compiles a statement string into a <a href="https://sqlite.org/c3ref/stmt.html">sqlite statement</a> and associate such statement to an identifier.</p>
 <p>Using this command you can insert parameters using the special symbol <code>?NNN</code>, those parameters will be bind to the statements when you are executing the statement itself.</p>
 <p>For now only the <code>?NNN</code> syntax is supported, where <code>N</code> is a digit (Ex. <code>?1</code>, <code>?2</code>, <code>?3</code> ...)</p>
@@ -238,7 +312,7 @@ INSERT INTO foo VALUES(?1, ?123, ?564); -- this one will be more problematic, an
 <li><a href="https://redis.io/topics/modules-blocking-ops">Redis Blocking Command</a></li>
 </ol>
 <h2 id="redisqlexec_statement">REDISQL.EXEC_STATEMENT</h2>
-<h4 id="redisqlexec_statement-db_key-stmt_identifier-binding_parameters">REDISQL.EXEC_STATEMENT db_key stmt_identifier [binding_parameters ...]</h4>
+<h4 id="redisqlexec_statementnow-db_key-stmt_identifier-binding_parameters">REDISQL.EXEC_STATEMENT[.NOW] db_key stmt_identifier [binding_parameters ...]</h4>
 <p>This command binds all the parameters to the statement created using <a href="#redisqlcreate_statement"><code>REDISQL.CREATE_STATEMENT</code></a> and identified by <code>stmt_identifier</code>. Then the module executes the statement against the database associated to <code>db_key</code>.</p>
 <p>For each parameter in the query of the form <code>?nnn</code> the engine will look for the <code>nnn-th</code> binding_parameters.
 So if the statements is from the following query:</p>
@@ -255,6 +329,7 @@ So if the statements is from the following query:</p>
 <p>Redis works using a text protocol, all the arguments are encoded as text, hence the module is forced to use the procedure <code>sqlite3_bind_text</code>, however, SQLite is smart enough to recognize numbers and treat them correctly. Numbers will be treated as numbers and text will be treated as text.</p>
 <p>Finally, once completed the binding part the statement is executed and its result is returned to the client.</p>
 <p>This command as well is not blocking, all the work happens in a different thread from the one of Redis.</p>
+<p>If you need to query your database, without modifying the data is a better idea to use <a href="#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a>.</p>
 <p><strong>Complexity</strong>: The complexity to retrieve and to bind the parameters is roughly constant for any practical purpose, however, the overall complexity will be dominated by the time to execute the query.</p>
 <p><strong>See also</strong>:</p>
 <ol>
@@ -262,9 +337,30 @@ So if the statements is from the following query:</p>
 <li><a href="https://sqlite.org/c3ref/bind_blob.html">SQLite bindings, <code>sqlite3_bind_text</code></a></li>
 <li><a href="#redisqlcreate_statement"><code>REDISQL.CREATE_STATEMENT</code></a></li>
 <li><a href="https://redis.io/topics/modules-blocking-ops">Redis Blocking Command</a></li>
+<li><a href="#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a> </li>
+</ol>
+<h2 id="redisqlquery_statement">REDISQL.QUERY_STATEMENT</h2>
+<h4 id="redisqlquery_statementnow-db_key-stmt_identifier-binding_parameters">REDISQL.QUERY_STATEMENT[.NOW] db_key stmt_identifier [binding_parameters ...]</h4>
+<p>This command behaves similarly to <a href="#redisqlexec_statement"><code>REDISQL.EXEC_STATEMENT</code></a> however it does impose an additional constraint.</p>
+<p>It executes the statement if it is a read-only operation, otherwise, it returns an error.</p>
+<p>A read-only operation is defined by the result of calling <a href="https://www.sqlite.org/c3ref/stmt_readonly.html"><code>sqlite3_stmt_readonly</code></a> on the compiled statement.</p>
+<p>The statement is executed if and only if <a href="https://www.sqlite.org/c3ref/stmt_readonly.html"><code>sqlite3_stmt_readonly</code></a> returns true.</p>
+<p>The result of <a href="https://www.sqlite.org/c3ref/stmt_readonly.html"><code>sqlite3_stmt_readonly</code></a> is cached.</p>
+<p>If you don't want to create a statement to run a query just once you can use <a href="#redisqlquery"><code>REDISQL.QUERY</code></a>.</p>
+<p><strong>Complexity</strong>: Similar to <a href="#redisqlexec_statement"><code>REDISQL.EXEC_STATEMENT</code></a>, however, if a statement is not read-only it is aborted immediately and it does return an appropriate error.</p>
+<p><strong>See also</strong>:</p>
+<ol>
+<li><a href="https://sqlite.org/c3ref/prepare.html">SQLite <code>sqlite3_prepare_v2</code></a></li>
+<li><a href="https://sqlite.org/c3ref/stmt.html">SQLite <code>statement</code> aka <code>sqlite3_stmt</code></a></li>
+<li><a href="https://sqlite.org/c3ref/step.html">SQLite <code>sqlite3_step</code></a></li>
+<li><a href="https://sqlite.org/pragma.html">SQLite <code>PRAGMA</code>s</a></li>
+<li><a href="https://redis.io/topics/modules-blocking-ops">Redis Blocking Command</a> </li>
+<li><a href="#redisqlexec_statement"><code>REDISQL.EXEC_STATEMENT</code></a></li>
+<li><a href="https://www.sqlite.org/c3ref/stmt_readonly.html">SQLite <code>sqlite3_stmt_readonly</code></a></li>
+<li><a href="#redisqlquery"><code>REDISQL.QUERY</code></a> </li>
 </ol>
 <h2 id="redisqldelete_statement">REDISQL.DELETE_STATEMENT</h2>
-<h4 id="redisqldelete_statement-db_key-stmt_identifier">REDISQL.DELETE_STATEMENT db_key stmt_identifier</h4>
+<h4 id="redisqldelete_statementnow-db_key-stmt_identifier">REDISQL.DELETE_STATEMENT[.NOW] db_key stmt_identifier</h4>
 <p>This command eliminates a statement from the database.</p>
 <p>It first looks it up into the internal hash table, if it finds the statement the command removes it from the internal hash table and then remove it from an internal SQLite table.</p>
 <p>Also, this command is not blocking and work in a different thread from the main Redis one.</p>
@@ -278,7 +374,7 @@ So if the statements is from the following query:</p>
 <li><a href="https://redis.io/topics/modules-blocking-ops">Redis Blocking Command</a></li>
 </ol>
 <h2 id="redisqlupdate_statement">REDISQL.UPDATE_STATEMENT</h2>
-<h4 id="redisqlupdate_statement-db_key-stmt_identifier-statement">REDISQL.UPDATE_STATEMENT db_key stmt_identifier "statement"</h4>
+<h4 id="redisqlupdate_statementnow-db_key-stmt_identifier-statement">REDISQL.UPDATE_STATEMENT[.NOW] db_key stmt_identifier "statement"</h4>
 <p>The command update and <em>existing</em> statement changing its internal implementation to the one provide as string.</p>
 <p>If the statement does not exist the command will fail and return an error, again this is a safety measure, you must be completely aware that you are changing the implementation of a statement and updating a not existing statement or creating an existing one will result in an error.</p>
 <p>Internally the command starts checking if the statement is already defined, then it tries to compile the string into a <a href="https://sqlite.org/c3ref/stmt.html"><code>sqlite3_stmt</code></a> and if everything went right it finally updates the metadata table and finally returns to the client.</p>
@@ -291,6 +387,79 @@ So if the statements is from the following query:</p>
 <li><a href="#redisqlexec_statement"><code>REDISQL.EXEC_STATEMENT</code></a></li>
 <li><a href="#redisqldelete_statement"><code>REDISQL.DELETE_STATEMENT</code></a></li>
 <li><a href="https://redis.io/topics/modules-blocking-ops">Redis Blocking Command</a></li>
+</ol>
+<h1 id="virtual-tables">Virtual Tables</h1>
+<p>What follows is not a RediSQL command but an SQLite virtual table introduced by the module.</p>
+<p>Virtual tables behave similarly to normal tables but have some limitations, for a deeper explanation please visit the <a href="https://sqlite.org/vtab.html">official SQLite documentation about virtual tables.</a></p>
+<p>At the moment the module provides a single read-only virtual table: <code>REDISQL_TABLES_BRUTE_HASH</code>.</p>
+<h2 id="redisql_tables_brute_hash">REDISQL_TABLES_BRUTE_HASH</h2>
+<p>This virtual table allows you to query <a href="https://redis.io/topics/data-types#hashes">Redis Hashes</a> that follow a similar pattern.</p>
+<p>A redis hash is composed by a key, that identifies the structure in the whole database, and several sub-keys that map to different string fields.</p>
+<p>This structure can easily be mapped to a standard table, where the key identifies the row and the sub-keys the columns.</p>
+<p>Redis does not impose any limitation to the format of the hash key, however, in order to use the virtual table you need to follow a specific syntax that happens to be the de-facto standard for hash keys.</p>
+<p>The key must be in the following format <code>$tableName:$id</code> where <code>$id</code> must be an integer. There are no limitations on the sub-keys.</p>
+<pre><code>127.0.0.1:6379&gt; HSET cats:1 name romeo location rome hungry 3
+(integer) 3
+127.0.0.1:6379&gt; HSET cats:2 name garfield location london hungry 10
+(integer) 3
+127.0.0.1:6379&gt; HSET cats:3 name &quot;simon's cat&quot; location &quot;simon's house&quot; hungry 8
+(integer) 3
+</code></pre>
+
+<p>In this examples we have a table of cats, each with a name, a location, and a hungry level.</p>
+<p>Redis is perfect if we want to know how hungry is <code>romeo</code> or where is located <code>garfield</code>.</p>
+<p>However is a little more difficult to answer query like: who is the hungriest cat? Are there any cats in London? </p>
+<p>Of course, the use of different data structures could alleviate these issues but then there will be the necessity to keep the several data structures in sync one with the other.</p>
+<p>Another alternative can be the use of the <code>REDISQL_TABLE_BRUTE_HASH</code> virtual table.</p>
+<pre><code>127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;CREATE VIRTUAL TABLE funny_cats USING REDISQL_TABLES_BRUTE_HASH(cats, name, location, hungry);&quot;
+1) DONE
+2) (integer) 0
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;SELECT * FROM funny_cats&quot;
+1) 1) &quot;cats:2&quot;
+   2) &quot;garfield&quot;
+   3) &quot;london&quot;
+   4) &quot;10&quot;
+2) 1) &quot;cats:1&quot;
+   2) &quot;romeo&quot;
+   3) &quot;rome&quot;
+   4) &quot;3&quot;
+3) 1) &quot;cats:3&quot;
+   2) &quot;simon's cat&quot;
+   3) &quot;simon's house&quot;
+   4) &quot;8&quot;
+</code></pre>
+
+<p>This virtual table allows querying the redis hashes using a more convenient SQL syntax. It does require a constant amount of space but it operates in linear time with the respect of the elements in the "hash table".</p>
+<p>The syntax of the virtual table is quite simple, <code>REDISQL_TABLES_BRUTE_HASH(cats, name, location, hungry)</code>, as first we need the <code>$tableName</code>, so the key of every row without the <code>:$id</code> part. 
+Then the columns of the table. Please note that you do <strong>not</strong> provide the type of the column in the declaration.</p>
+<p>Is not necessary that every key defines all the columns (sub-keys), if a key does not have a specific sub-key, it will simply be returned as (nil).</p>
+<p>This virtual table is a read-only virtual table, it means that -- at the moment -- you can only <code>select</code> from this table, so you cannot <code>insert</code>, <code>update</code> or <code>delete</code> from this table.</p>
+<p>Another limitation is that Redis Hashes can store only strings, not integers or floats. This implies that by default we will return only strings when you query a table, of course, you could cast them to integers or float via SQLite.</p>
+<pre><code>127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;SELECT name, location, CAST(hungry AS INTEGER) FROM cats&quot;
+1) 1) &quot;garfield&quot;
+   2) &quot;london&quot;
+   3) (integer) 10
+2) 1) &quot;romeo&quot;
+   2) &quot;rome&quot;
+   3) (integer) 3
+3) 1) &quot;simon's cat&quot;
+   2) &quot;simon's house&quot;
+   3) (integer) 8
+</code></pre>
+
+<p>This specific virtual table works by continuously querying Redis itself.</p>
+<p>When you execute a <code>SELECT</code> against it, the first step is to <a href="https://redis.io/commands/scan"><code>SCAN</code></a> all the possible keys, for each key then we retrieve the associated values in each sub-key using <a href="https://redis.io/commands/hget"><code>HGET</code></a> and finally we return the result.</p>
+<p><strong>Complexity</strong>.</p>
+<p>This implementation comes with several trade-offs.</p>
+<p>The space complexity is constant and negligible, no data is duplicated and are necessary only few bytes for the SQLite data structures.</p>
+<p>The time complexity for a query is linear <code>O(m*n)</code> where <code>m</code> is the number of rows and <code>n</code> is the number of columns.</p>
+<p>This virtual table does not support <code>INSERT</code>, <code>UPDATE</code> or <code>DELETE</code>.</p>
+<p><strong>See also</strong>:</p>
+<ol>
+<li><a href="https://sqlite.org/vtab.html">SQLite virtual tables</a></li>
+<li><a href="https://redis.io/topics/data-types#hashes">Redis Hashes</a></li>
+<li><a href="https://redis.io/commands/scan"><code>SCAN</code></a></li>
+<li><a href="https://redis.io/commands/hget"><code>HGET</code></a></li>
 </ol></div>
             
         </div>

@@ -4,7 +4,7 @@
     
     <url>
      <loc>None/</loc>
-     <lastmod>2018-03-30</lastmod>
+     <lastmod>2018-08-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -12,15 +12,15 @@
     
     <url>
      <loc>None/references/</loc>
-     <lastmod>2018-03-30</lastmod>
+     <lastmod>2018-08-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
 
     
     <url>
-     <loc>None/motivations/</loc>
-     <lastmod>2018-03-30</lastmod>
+     <loc>None/pro/</loc>
+     <lastmod>2018-08-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -28,8 +28,48 @@
     
         
     <url>
+     <loc>None/motivations/</loc>
+     <lastmod>2018-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/pro_motivations/</loc>
+     <lastmod>2018-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
+    
+        
+    <url>
      <loc>None/blog/analytics/</loc>
-     <lastmod>2018-03-30</lastmod>
+     <lastmod>2018-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/blog/JaaS/</loc>
+     <lastmod>2018-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/blog/performances/</loc>
+     <lastmod>2018-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/blog/release_0.5.0/</loc>
+     <lastmod>2018-08-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/blog/release_0.6.0/</loc>
+     <lastmod>2018-08-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
