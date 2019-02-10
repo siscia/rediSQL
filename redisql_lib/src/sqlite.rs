@@ -124,7 +124,10 @@ impl RawConnection {
             ffi::sqlite3_open_v2(
                 ptr_path,
                 &mut db,
-                ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_READWRITE,
+                ffi::SQLITE_OPEN_CREATE
+                    | ffi::SQLITE_OPEN_READWRITE
+                    | ffi::SQLITE_OPEN_URI
+                    | ffi::SQLITE_OPEN_SHAREDCACHE,
                 ptr::null(),
             )
         };
