@@ -1,6 +1,6 @@
 [package]
 name = "rediSQL"
-version = "0.7.1"
+version = "0.8.0"
 authors = ["Simone Mosciatti <simone@redbeardlab.tech>"]
 
 [lib]
@@ -18,3 +18,4 @@ redisql_lib = {path = "./redisql_lib"}
 default = []
 # pro = ["engine_pro"]
 # trial = ["engine_pro/trial"]
+

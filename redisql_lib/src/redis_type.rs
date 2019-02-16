@@ -127,6 +127,7 @@ impl<'a> Drop for RMString<'a> {
 //this structure contains an array of pointer to RMString, however, on drop, it drops only the
 //array and leak the RMString.
 //It is to be used as argument to RM_Call when the format includes the `v`, an array of RMString.
+#[derive(Debug)]
 pub struct LeakyArrayOfRMString<'a> {
     array: Vec<*mut ffi::RedisModuleString>,
     ctx: &'a Context,
@@ -136,7 +137,7 @@ impl<'a> LeakyArrayOfRMString<'a> {
     pub fn new(ctx: &'a Context) -> LeakyArrayOfRMString {
         LeakyArrayOfRMString {
             array: Vec::with_capacity(24),
-            ctx: ctx,
+            ctx,
         }
     }
     pub fn push(&mut self, s: &str) {
@@ -155,8 +156,12 @@ impl<'a> LeakyArrayOfRMString<'a> {
     pub fn len(&self) -> usize {
         self.array.len()
     }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
+#[derive(Debug)]
 pub struct XADDCommand<'a> {
     ctx: &'a Context,
     array: LeakyArrayOfRMString<'a>,
@@ -164,15 +169,24 @@ pub struct XADDCommand<'a> {
 
 impl<'a> XADDCommand<'a> {
     pub fn new(ctx: &'a Context, key: &str) -> XADDCommand<'a> {
+        XADDCommand::new_with_id(ctx, key, "*")
+    }
+    pub fn new_with_id(
+        ctx: &'a Context,
+        key: &str,
+        id: &str,
+    ) -> XADDCommand<'a> {
         let mut array = LeakyArrayOfRMString::new(ctx);
         array.push(key);
+        array.push(id);
         XADDCommand { ctx, array }
     }
     pub fn add_element(&mut self, field: &str, value: &str) {
         self.array.push(field);
         self.array.push(value);
     }
-    // this command must be called inside a transaction with the context locked
+    // this command must be called inside a transaction with the context locked, hence we use as
+    // parameter also a ContextLock
     pub fn execute(&mut self, _lock: &ContextLock) -> CallReply {
         let xadd = CString::new("XADD").unwrap();
         let call_specifiers = CString::new("!v").unwrap();
@@ -192,9 +206,22 @@ impl<'a> XADDCommand<'a> {
 #[allow(non_snake_case)]
 pub fn CreateCommand(
     ctx: &Context,
-    name: String,
+    name: &str,
     f: ffi::RedisModuleCmdFunc,
-    flags: String,
+    flags: &str,
+) -> i32 {
+    CreateCommandWithKeys(ctx, name, f, flags, 1, 1, 1)
+}
+
+#[allow(non_snake_case)]
+pub fn CreateCommandWithKeys(
+    ctx: &Context,
+    name: &str,
+    f: ffi::RedisModuleCmdFunc,
+    flags: &str,
+    first_key: i32,
+    last_key: i32,
+    key_step: i32,
 ) -> i32 {
     let command_c_name = CString::new(name).unwrap();
     let command_ptr_name = command_c_name.as_ptr();
@@ -208,9 +235,9 @@ pub fn CreateCommand(
             command_ptr_name,
             f,
             flag_ptr_name,
-            1,
-            1,
-            1,
+            first_key,
+            last_key,
+            key_step,
         )
     }
 }

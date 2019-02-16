@@ -508,7 +508,7 @@ pub enum QueryResult {
         modified_rows: i32,
     },
     Array {
-        names: Option<Vec<String>>,
+        names: Vec<String>,
         array: Vec<sql::Row>,
     },
 }
@@ -666,16 +666,23 @@ fn return_value_v2(
 ) {
     match return_method {
         ReturnMethod::Reply => return_value(client, result),
-        ReturnMethod::Stream { name } => match result {
+        ReturnMethod::Stream { name: stream_name } => match result {
             Err(_) => return_value(client, result),
             Ok(QueryResult::OK {}) => return_value(client, result),
             Ok(QueryResult::DONE { .. }) => {
                 return_value(client, result)
             }
-            // use names to give well names... to the element in the stream
-            Ok(QueryResult::Array { array: rows, names }) => {
-                let result =
-                    stream_query_result_array(client, name, rows);
+            Ok(QueryResult::Array {
+                array: rows,
+                names: columns_names,
+            }) => {
+                let context = Context::thread_safe(client);
+                let result = stream_query_result_array(
+                    &context,
+                    stream_name,
+                    columns_names.as_slice(),
+                    rows,
+                );
                 return_value(client, result)
             }
         },
@@ -683,18 +690,17 @@ fn return_value_v2(
 }
 
 pub fn stream_query_result_array(
-    client: &BlockedClient,
+    context: &Context,
     stream_name: &str,
+    columns_names: &[String],
     array: Vec<sql::Row>,
 ) -> Result<QueryResult, err::RediSQLError> {
     let row_last_index = array.len() - 1;
 
-    let mut result = Vec::with_capacity(3);
+    let mut result = Vec::with_capacity(4);
     result.push(sql::Entity::Text {
         text: stream_name.to_string(),
     });
-
-    let context = Context::thread_safe(client);
 
     let mut lock = context.lock();
     for (i, row) in array.iter().enumerate() {
@@ -707,31 +713,42 @@ pub fn stream_query_result_array(
         let mut xadd = rm::XADDCommand::new(&context, stream_name);
         for (j, entity) in row.iter().enumerate() {
             match entity {
-                sql::Entity::Null
-                | sql::Entity::OK {}
-                | sql::Entity::DONE { .. } => {
+                sql::Entity::OK {} | sql::Entity::DONE { .. } => {
                     // do nothing
+                }
+                sql::Entity::Null => {
+                    xadd.add_element(
+                        &format!("null:{}", &columns_names[j]),
+                        "(null)",
+                    );
                 }
                 sql::Entity::Integer { int } => {
                     xadd.add_element(
-                        &j.to_string(),
+                        &format!("int:{}", &columns_names[j]),
                         &int.to_string(),
                     );
                 }
                 sql::Entity::Float { float } => {
                     xadd.add_element(
-                        &i.to_string(),
+                        &format!("real:{}", &columns_names[j]),
                         &float.to_string(),
                     );
                 }
                 sql::Entity::Text { text } => {
-                    xadd.add_element(&j.to_string(), text);
+                    xadd.add_element(
+                        &format!("text:{}", &columns_names[j]),
+                        text,
+                    );
                 }
                 sql::Entity::Blob { blob } => {
-                    xadd.add_element(&j.to_string(), blob);
+                    xadd.add_element(
+                        &format!("blob:{}", &columns_names[j]),
+                        blob,
+                    );
                 }
             }
         }
+        debug!("XADD {:?}", xadd);
         let xadd_result = xadd.execute(&lock);
         match xadd_result {
             rm::CallReply::RString { .. } => match i {
@@ -752,25 +769,34 @@ pub fn stream_query_result_array(
             rm::CallReply::RError { .. } => {
                 context.release(lock);
                 return Err(RediSQLError::new(
-                    format!(
-                        "{}",
-                        xadd_result.access_error().unwrap()
-                    ),
+                    xadd_result.access_error().unwrap().to_string(),
                     format!("Error in XADD to {}", stream_name),
                 ));
                 // return an error and unlock
             }
-            _ => panic!(),
+            _ => {
+                debug!("XADD result: {:?}", xadd_result);
+                panic!();
+            }
         }
     }
-
     context.release(lock);
+
+    if result.len() == 2 {
+        let start_and_end = result[1].clone();
+        result.push(start_and_end);
+    }
+    result.push(sql::Entity::Integer {
+        int: array.len() as i64,
+    });
+
     Ok(QueryResult::Array {
-        names: Some(vec![
+        names: vec![
             String::from("stream"),
             String::from("first_id"),
             String::from("last_id"),
-        ]),
+            String::from("size"),
+        ],
         array: vec![result],
     })
 }
@@ -1303,8 +1329,8 @@ pub unsafe fn Replicate(
 
 pub fn register_function(
     context: &rm::Context,
-    name: String,
-    flags: String,
+    name: &str,
+    flags: &str,
     f: extern "C" fn(
         *mut rm::ffi::RedisModuleCtx,
         *mut *mut rm::ffi::RedisModuleString,
@@ -1321,14 +1347,40 @@ pub fn register_function(
     Ok(())
 }
 
-pub fn register_write_function(
-    ctx: &rm::Context,
-    name: String,
+pub fn register_function_with_keys(
+    context: &rm::Context,
+    name: &str,
+    flags: &str,
+    first_key: i32,
+    last_key: i32,
+    key_step: i32,
     f: extern "C" fn(
         *mut rm::ffi::RedisModuleCtx,
         *mut *mut rm::ffi::RedisModuleString,
         ::std::os::raw::c_int,
     ) -> i32,
 ) -> Result<(), i32> {
-    register_function(ctx, name, String::from("write"), f)
+    let create_db: rm::ffi::RedisModuleCmdFunc = Some(f);
+
+    if {
+        rm::CreateCommandWithKeys(
+            context, name, create_db, flags, first_key, last_key,
+            key_step,
+        )
+    } == rm::ffi::REDISMODULE_ERR
+    {
+        return Err(rm::ffi::REDISMODULE_ERR);
+    }
+    Ok(())
+}
+pub fn register_write_function(
+    ctx: &rm::Context,
+    name: &str,
+    f: extern "C" fn(
+        *mut rm::ffi::RedisModuleCtx,
+        *mut *mut rm::ffi::RedisModuleString,
+        ::std::os::raw::c_int,
+    ) -> i32,
+) -> Result<(), i32> {
+    register_function(ctx, name, "write", f)
 }
