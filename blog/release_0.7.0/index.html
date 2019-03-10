@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+
+	<title>Release 0.7.0 - RediSQL</title>
+
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-116709819-1', 'auto');
+            ga('send', 'pageview');
+        </script>
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="../..">RediSQL</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="../..">Overview</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../references/">References</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../pro/">Pro</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../../motivations/">Motivations</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../pro_motivations/">PRO Motivations</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Blog <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../release_0.9.0/">Release 0.9.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../release_0.8.0/">Release 0.8.0</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Release 0.7.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../release_0.6.0/">Release 0.6.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../release_0.5.0/">Release 0.5.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../analytics/">Analytics</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../performances/">Double performances of RediSQL going zero copy</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../python/using-redisql-with-python/">Using RediSQL with Python</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../golang/using-redisql-with-golang/">Using RediSQL with Go(lang)</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../node/using-redisql-with-node/">Using RediSQL with Node.js</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                </ul>
+            
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                
+                    <li >
+                        <a rel="next" href="../release_0.8.0/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../release_0.6.0/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="https://github.com/RedBeardLab/rediSQL">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#release-070-of-redisql-sql-steroids-for-redis">Release 0.7.0 of RediSQL, SQL steroids for Redis</a></li>
+        
+            <li><a href="#redisql-redis-on-sql-steroids">RediSQL, Redis on SQL steroids.</a></li>
+        
+            <li><a href="#motivations">Motivations</a></li>
+        
+            <li><a href="#end">End</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="release-070-of-redisql-sql-steroids-for-redis">Release 0.7.0 of RediSQL, SQL steroids for Redis</h1>
+<h4 id="redisql-redis-on-sql-steroids">RediSQL, Redis on SQL steroids.</h4>
+<p>RediSQL is a Redis module that provides full SQL capabilities to Redis, it is the simplest and fastest way to get an SQL database up and running, without incurring in difficult operational issues and it can scale quite well with your business.</p>
+<p>The fastest introduction to RediSQL is <a href="https://redisql.com">our homepage</a></p>
+<p><strong>tl;dr</strong> This release introduce a new commands <a href="../../references/#redisqlcopy"><code>REDISQL.COPY</code></a> that copy the content from a source database into a destination database.</p>
+<h2 id="motivations">Motivations</h2>
+<p>Since from the very first release and the very first user, we have been asked a lot about the possibility to copy SQLite database into disk or into memory.</p>
+<p>It is definitely an useful feature, suppose to already have the database and you simply want to make it available to some of your services.</p>
+<p>We wait a bit before to incorporate on RediSQL such capabilities, mostly because we weren’t sure about the API to offer.</p>
+<p>Finally we decide to pull the trigger and we implemented a new command <a href="../../references/#redisqlcopy"><code>REDISQL.COPY</code></a>.</p>
+<p>The <a href="../../references/#redisqlcopy"><code>REDISQL.COPY</code></a> command takes two parameters as input, a <code>source</code> database and a <code>destination</code> database and it overwrite the content of the <code>source</code> database into the <code>destination</code> database.</p>
+<p>It is important to understand that the content of the destination database is completely lost after a <code>REDISQL.COPY</code></p>
+<p>The <a href="../../references/#redisqlcopy"><code>REDISQL.COPY</code></a> command takes as input two databases, both of them must be created using the <code>REDISQL.CREATE_DB</code> command. 
+This API allows several use cases that are quite interesting.</p>
+<ol>
+<li>Make a backup/copy of your database</li>
+<li>Split load to multiple threads</li>
+<li>Move a database from a in-memory database to a disk-based database</li>
+<li>Move a database from  a disk-based database to a in-memory database</li>
+</ol>
+<h3 id="few-examples">Few Examples</h3>
+<p>I will show briefly some examples of those use cases.</p>
+<p>Making a backup/copy </p>
+<p>Backups are already provided by the internal of Redis itself, all the database will be copied into the RDB files.
+However you may be interested in having just a copy of your database, so that you can archive it in a different way, or just explore it offline.</p>
+<p>Suppose you have your database <code>DB</code> running with some table and some data:</p>
+<pre><code>&gt; REDISQL.CREATE_DB DB
+OK
+&gt; REDISQL.EXEC DB "CREATE TABLE foo( ... )"
+DONE
+0L
+&gt; REDISQL.EXEC DB "INSERT INTO foo VALUES ( ... )"
+DONE
+1L
+</code></pre>
+<p>Now you will like to transfer that same database into a file, so that you can archive it or analyze it.</p>
+<p>The first step would be to create another database backed by a file.</p>
+<pre><code>&gt; REDISQL.CREATE_DB BACKUP "/home/foo/backup.sqlite"
+OK
+</code></pre>
+<p>In this way we have created a new, empty database that is backed by a file.</p>
+<p>You will see the small file <code>home/foo/backup.sqlite</code></p>
+<p>At this point you just need to make a copy of it.</p>
+<pre><code>&gt; REDISQL.COPY DB BACKUP
+OK
+</code></pre>
+<p>Now the file <code>/home/foo/backup.sqlite</code> will contains all the data that were originally on the <code>DB</code> database.</p>
+<h3 id="load-a-database">Load a database</h3>
+<p>Now, suppose that the data you want to serve via RediSQL are already inside a SQLite database, or suppose that you are recovering from a previous backup. However you would like to have the database in memory, since we know the load will be quite high.</p>
+<p>Assuming  your database is stored into <code>/home/foo/recover.sqlite</code> we start by loading it, and then move it into an in-memory database, and finally we can also delete the database we used for recovering.</p>
+<pre><code>&gt; REDISQL.CREATE_DB TO_RECOVER "/home/foo/recover.sqlite"
+OK
+&gt; REDISQL.CREATE_DB DB
+OK
+&gt; REDISQL.COPY TO_RECOVER DB
+OK
+&gt; DEL TO_RECOVER
+OK
+</code></pre>
+<p>At this point we have only one database <code>DB</code> that is an in-memory one and we have used the <code>TO_RECOVER</code> database to load the recovering file.</p>
+<h3 id="spread-load">Spread load</h3>
+<p>Another quite interesting use case is about load spreading.</p>
+<p>Suppose to have a read-only database <code>DB1</code> that makes quite complex and long queries, if that start to be a problem we could spread the load into two identical databases.</p>
+<pre><code>&gt; REDISQL.CREATE_DB DB2
+OK
+&gt; REDISQL.COPY DB1 DB2
+OK
+</code></pre>
+<p>Now we have the same dataset in two different database, each one of them with its own thread of execution. This will allow us to round robin between the two databases and achieve smaller latencies.</p>
+<h2 id="end">End</h2>
+<p>With this post we showed the newest features of RediSQL.</p>
+<p>The product start to be quite stable, more performance test will come in the next release but we don’t plan to touch the API.</p>
+<p>If we don’t change the API the next release will be the v1.0.0</p>
+<p>As always you can find all the public releases on the <a href="https://github.com/RedBeardLab/rediSQL/releases/tag/v0.5.0">github page</a>, you can openly access the same public release on the <a href="https://plasso.com/s/epp4GbsJdp-redisql/">open page of our shop</a> or you can buy the complete PRO package <a href="https://plasso.com/s/epp4GbsJdp-redisql/signup/">signing up in the shop</a>.</p>
+<p>Remember that signing up for the PRO product also provide you free support from us, the creator of the project, so that we can point you to the right direction and suggest the best use cases for our product.</p></div>
+            
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script>
+        <script>var base_url = '../..';</script>
+        <script data-main="../../mkdocs/js/search.js" src="../../mkdocs/js/require.js"></script>
+        <script src="../../js/base.js"></script>
+        <script src="../../blog/node/hn.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

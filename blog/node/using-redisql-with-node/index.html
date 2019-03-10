@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+
+	<title>Using RediSQL with Node.js - RediSQL</title>
+
+        <link href="../../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../../css/highlight.css">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-116709819-1', 'auto');
+            ga('send', 'pageview');
+        </script>
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="../../..">RediSQL</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="../../..">Overview</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../../references/">References</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../../pro/">Pro</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../../../motivations/">Motivations</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../../pro_motivations/">PRO Motivations</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Blog <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../../release_0.9.0/">Release 0.9.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../release_0.8.0/">Release 0.8.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../release_0.7.0/">Release 0.7.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../release_0.6.0/">Release 0.6.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../release_0.5.0/">Release 0.5.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../analytics/">Analytics</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../performances/">Double performances of RediSQL going zero copy</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../python/using-redisql-with-python/">Using RediSQL with Python</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../golang/using-redisql-with-golang/">Using RediSQL with Go(lang)</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Using RediSQL with Node.js</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                </ul>
+            
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                
+                    <li >
+                        <a rel="next" href="../../golang/using-redisql-with-golang/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li class="disabled">
+                        <a rel="prev" >
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="https://github.com/RedBeardLab/rediSQL">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#using-redisql-with-nodejs">Using RediSQL with Node.js</a></li>
+        
+            <li><a href="#dependencies">Dependencies</a></li>
+        
+            <li><a href="#connect-to-redis-and-make-it-asycnawait-ready">Connect to Redis and make it asycn/await ready.</a></li>
+        
+            <li><a href="#polling-hn-api-to-get-the-newest-items">Polling HN API to get the newest items</a></li>
+        
+            <li><a href="#the-redisql-structure">The RediSQL structure</a></li>
+        
+            <li><a href="#insert-data-into-the-database">Insert data into the database</a></li>
+        
+            <li><a href="#running-it">Running it</a></li>
+        
+            <li><a href="#concluding">Concluding</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="using-redisql-with-nodejs">Using RediSQL with Node.js</h1>
+<p>This tutorial will help you to get start to use RediSQL with Node.js</p>
+<p>In this tutorial we will scrape the content of Hacker News using their <a href="https://github.com/HackerNews/API">API documented here</a>.</p>
+<p>To communicate with Redis we will use the popular <a href="https://github.com/NodeRedis/node_redis">node_redis</a> library wich is the most suitable to communicate with Redis Modules and RediSQL. Other libraries can be used as well, but some more work will be necessary.</p>
+<p>To follow this tutorial you will need a modern (&gt; v4.0) instance of Redis running RediSQL.
+You can obtain RediSQL from <a href="https://payhip.com/b/Ri4d">our shop</a> or from the <a href="https://github.com/RedBeardLab/rediSQL/releases">github releases</a>.</p>
+<p>To load RediSQL is sufficient to pass it as argument to the redis-server: <code>./redis-server --loadmodule /path/to/redisql.so</code></p>
+<p>The whole code show in this example is reachable <a href="https://github.com/RedBeardLab/rediSQL/blob/master/doc/docs/blog/node/hn.js">here</a></p>
+<h2 id="dependencies">Dependencies</h2>
+<p>The first step is always to load the dependencies, for this little script we will need just 3 dependencies:</p>
+<ol>
+<li><code>util</code> for formatting strings and promisify functions</li>
+<li><code>axios</code> for making HTTP requests</li>
+<li><code>redis</code> for actually talking with RediSQL</li>
+</ol>
+<pre><code class="js">const util = require('util');
+const axios = require('axios');
+const redis = require('redis');
+</code></pre>
+
+<h2 id="connect-to-redis-and-make-it-asycnawait-ready">Connect to Redis and make it asycn/await ready.</h2>
+<p>RediSQL works on a normal Redis instance, hence we need to create a connection to our Redis.</p>
+<p>In this tutorial we are going to use the async/await syntax that is not natively supported by <code>node_redis</code> but that it can easily added using <code>promisify</code>.</p>
+<p>We first create a new connection to Redis, just one that is enough, and then we promisify the <code>send_command</code> method in order to give us the nice async/await syntax.</p>
+<pre><code class="js">const client = redis.createClient();
+const send_command = util.promisify(client.send_command).bind(client); 
+</code></pre>
+
+<h2 id="polling-hn-api-to-get-the-newest-items">Polling HN API to get the newest items</h2>
+<p>The API of HN provides an endpoint to retrieve the ID of the latest element added to the website.
+The ID are auto-incremental, hence if the ID = <code>n</code> exists, it means that also the ID = <code>n - 1</code> exists as well.</p>
+<p>However is necessary a little of cautions, indeed, is possible that some items are not yet available if they exists, in such case they return the string <code>null</code> instead of a JSON object.
+We take care of this with a simple loop and an <code>if</code>.</p>
+<pre><code class="js">const getMaxItem = async () =&gt; {
+        let response = await axios.get(&quot;https://hacker-news.firebaseio.com/v0/maxitem.json&quot;);
+        return response.data;
+};
+
+const getItem = async id =&gt; {
+        let url = util.format(&quot;https://hacker-news.firebaseio.com/v0/item/%s.json&quot;, id);
+        while (true) {
+                let response = await axios.get(url);
+                let data = response.data;
+                if (data != &quot;null&quot;) {
+                        return data;
+                }
+        }
+};
+</code></pre>
+
+<h2 id="the-redisql-structure">The RediSQL structure</h2>
+<p>Now that we have removed all the boilerplate let's get down to business. We need to:</p>
+<ol>
+<li>Create our database in RediSQL using the <code>REDISQL.CREATE_DB</code> command.</li>
+<li>Create the table that will contains our data using the <code>REDISQL.EXEC</code> command.</li>
+<li>Create the statement to actually insert the data into the database using the <code>REDISQL.CREATE_STATEMENT</code> command. </li>
+</ol>
+<p>We will store in our table the <code>id</code> of the item we are adding, the author of the item, when the item was posted on HN and finally the whole item as a JSON structure.</p>
+<p>The third step is not strictly needed, but it provide defense against SQL-injections, is more performant, and it is just a cleaner way to do it. 
+The alternative would be to just use <code>REDISQL.EXEC</code> every time we want to add a new row to the database.</p>
+<p>All those steps are done in the <code>setUp</code> functions.</p>
+<pre><code class="js">const setUp = async () =&gt; {
+        await send_command(&quot;REDISQL.CREATE_DB&quot;, [&quot;HN&quot;]).catch( err =&gt; console.log(err) );
+        table = &quot;CREATE TABLE IF NOT EXISTS hn(id integer primary key, author text, time int, item text);&quot;
+        await send_command(&quot;REDISQL.EXEC&quot;, ['HN', table]).catch( err =&gt; console.log(err) );
+        stmt = &quot;INSERT INTO hn VALUES(&quot; + 
+        &quot;json_extract(json(?1),'$.id'),&quot; +
+        &quot;json_extract(json(?1),'$.by'),&quot; +
+        &quot;json_extract(json(?1),'$.time'),&quot; +
+        &quot;json(?1));&quot;;
+        await send_command(&quot;REDISQL.CREATE_STATEMENT&quot;, ['HN', 'insert_item', stmt])
+                .catch( err =&gt; console.log(err) );
+};
+</code></pre>
+
+<p>Note how nicely the <code>JSON1</code> modules help us. 
+It extracts for us the <code>id</code> of the item we want to add, the author of the item (the <code>by</code> field) and the time when the item was created.
+Without it we would be force to do that operation ourselves and pass more parameters to the statement.</p>
+<h2 id="insert-data-into-the-database">Insert data into the database</h2>
+<p>Finally let's make a simple function that will gets an item from HN and stores it into our database executing the statement we just created.</p>
+<pre><code class="js">const storeItem = async id =&gt; {
+        let item = await getItem(id);
+        console.log(item);
+        await send_command(&quot;REDISQL.EXEC_STATEMENT&quot;, ['HN', 'insert_item', JSON.stringify(item)])
+                .catch( err =&gt; console.log(err) );
+}
+</code></pre>
+
+<h2 id="running-it">Running it</h2>
+<p>Now that we have all our piece in order we can just combine them together.</p>
+<p>We will start by creating the database, table and statements.</p>
+<p>Then a simple infinite loop will simply keep pooling the API.
+As soon as it detects new items available, it download them, and store those into the database.</p>
+<p>We also include a small throttling mechanism to avoid hammering the API, which is not needed using the <code>sleep</code> function.</p>
+<pre><code class="js">const sleep = (waitTimeInMs) =&gt; new Promise(resolve =&gt; setTimeout(resolve, waitTimeInMs));
+
+(async () =&gt; {
+        setUp();
+        let maxItem = await getMaxItem();
+        while (true) {
+                let newMaxItem = await getMaxItem();
+                for (; maxItem &lt; newMaxItem; maxItem += 1) {
+                        storeItem(maxItem);
+                }
+                await sleep(5 * 1000);
+        }
+})()
+</code></pre>
+
+<h2 id="concluding">Concluding</h2>
+<p>In this small example (less than 60 lines) we show how simple and easy is to get started with RediSQL. We just set up the database and table once, along with the statement and that's it.
+A much quicker set up, especially for testing, than using classical databases as <code>Postgres</code> or <code>MySQL</code>.</p>
+<p>Indeed is sufficient to set up the database following always the same steps:</p>
+<ol>
+<li>Create the database with <code>REDISQL.CREATE_DB $db_name</code></li>
+<li>Create the schema inside your database <code>REDISQL.EXEC $db_name "CREATE TABLE ... etc"</code> and, if you want, the statements: <code>REDISSQL.CREATE_STATEMENT $db_name $statement_name "INSERT INTO ... etc"</code></li>
+<li>Start inserting data, with or without a statement: <code>REDISQL.EXEC_STATEMENT</code> or simply <code>REDISQL.EXEC</code></li>
+</ol>
+<p>Finally to query back the data is possible to use:</p>
+<ul>
+<li>queries <code>REDISQL.QUERY $db_name "SELECT * FROM ..."</code>,</li>
+<li>statements <code>REDISQL.CREATE_STATEMENT $db_name $query_name "SELECT * FROM ... WHERE foo = ?1"</code> and the <code>REDISQL.QUERY_STATEMENTS $db_name $query_name "paramenters"</code></li>
+<li>simple exec <code>REDISQL.EXEC $db_name "SELECT * FROM ... etc"</code></li>
+</ul>
+<p>Feel free to explore our <a href="../../../../references">references documentation</a> to understand better what capabilities RediSQL provides you.</p>
+<p>The complete code of this example is <a href="https://github.com/RedBeardLab/rediSQL/blob/master/doc/docs/blog/node/hn.js">available here.</a></p>
+<p>If you wish to see a similar tutorial for a different language, <a href="https://github.com/RedBeardLab/rediSQL/issues/new">open an issue on github.</a></p></div>
+            
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+
+        <script src="../../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../../js/highlight.pack.js"></script>
+        <script>var base_url = '../../..';</script>
+        <script data-main="../../../mkdocs/js/search.js" src="../../../mkdocs/js/require.js"></script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../blog/node/hn.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

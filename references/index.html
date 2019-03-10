@@ -108,6 +108,36 @@
                         
                             
 <li >
+    <a href="../blog/release_0.9.0/">Release 0.9.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/release_0.8.0/">Release 0.8.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/release_0.7.0/">Release 0.7.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/release_0.6.0/">Release 0.6.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/release_0.5.0/">Release 0.5.0</a>
+</li>
+
+                        
+                            
+<li >
     <a href="../blog/analytics/">Analytics</a>
 </li>
 
@@ -126,13 +156,19 @@
                         
                             
 <li >
-    <a href="../blog/release_0.5.0/">Release 0.5.0</a>
+    <a href="../blog/python/using-redisql-with-python/">Using RediSQL with Python</a>
 </li>
 
                         
                             
 <li >
-    <a href="../blog/release_0.6.0/">Release 0.6.0</a>
+    <a href="../blog/golang/using-redisql-with-golang/">Using RediSQL with Go(lang)</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../blog/node/using-redisql-with-node/">Using RediSQL with Node.js</a>
 </li>
 
                         
@@ -191,15 +227,25 @@
         
             <li><a href="#redisqlquery">REDISQL.QUERY</a></li>
         
+            <li><a href="#redisqlqueryinto">REDISQL.QUERY.INTO</a></li>
+        
             <li><a href="#redisqlcreate_statement">REDISQL.CREATE_STATEMENT</a></li>
         
             <li><a href="#redisqlexec_statement">REDISQL.EXEC_STATEMENT</a></li>
         
             <li><a href="#redisqlquery_statement">REDISQL.QUERY_STATEMENT</a></li>
         
+            <li><a href="#redisqlquery_statementinto">REDISQL.QUERY_STATEMENT.INTO</a></li>
+        
             <li><a href="#redisqldelete_statement">REDISQL.DELETE_STATEMENT</a></li>
         
             <li><a href="#redisqlupdate_statement">REDISQL.UPDATE_STATEMENT</a></li>
+        
+            <li><a href="#redisqlcopy">REDISQL.COPY</a></li>
+        
+            <li><a href="#redisqlstatistics">REDISQL.STATISTICS</a></li>
+        
+            <li><a href="#redisqlcopy_1">REDISQL.COPY</a></li>
         
     
         <li class="main "><a href="#virtual-tables">Virtual Tables</a></li>
@@ -276,6 +322,83 @@ If the file does not exist a new file will be created.</p>
 <li><a href="#redisqlexec"><code>REDISQL.EXEC</code></a></li>
 <li><a href="https://www.sqlite.org/c3ref/stmt_readonly.html">SQLite <code>sqlite3_stmt_readonly</code></a></li>
 <li><a href="#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a> </li>
+</ol>
+<h2 id="redisqlqueryinto">REDISQL.QUERY.INTO</h2>
+<h4 id="redisqlqueryintonow-stream_name-db_key-query">REDISQL.QUERY.INTO[.NOW] stream_name db_key "query"</h4>
+<p>This command is similar to <a href="#redisqlquery"><code>REDISQL.QUERY</code></a> but instead of returning the result of the query, it append each row to the <a href="https://redis.io/topics/streams-intro">stream</a> <code>stream_name</code> passed as first argument. </p>
+<p>The query must be a read-only one, exactly as <a href="#redisqlquery"><code>REDISQL.QUERY</code></a>.</p>
+<p>The command executes <a href="https://redis.io/commands/xadd"><code>XADD</code></a> to the stream, hence if the stream does not exists a new one is created. On the other hand, if the stream already exists the rows are simply appended.</p>
+<p>The command itself is eager, hence it compute the whole result, append it into the stream, and then it returns. Once the command returns, the whole result set is already in the Redis stream.</p>
+<p>The return value of the command depends on the result of the query:</p>
+<ol>
+<li>If the result of the query is empty, it simply returns <code>["DONE", 0]</code>, exactly like <a href="#redisqlquery"><code>REDISQL.QUERY</code></a>.</li>
+<li>If at least one row is returnend by the query the command returns the name of the stream where it appended the resulting rows, which is exactly the one passed as input, the first and the last ID added to the stream and the total number of entries added to the stream.</li>
+</ol>
+<p>The stream will use autogeneratated IDs.</p>
+<p>Each entry in a stream is a set of field-value (key-value) pairs. The field (key) will be the type of the row and its name separated by a colon. It cpuld be something like <code>int:users</code> or <code>text:user_name</code> or even <code>real:x_coordinate</code>.</p>
+<p>The value will simply store the value of the column untouched. </p>
+<pre><code>127.0.0.1:6379&gt; REDISQL.CREATE_DB DB
+OK
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;CREATE TABLE foo(a int, b int);&quot;
+1) DONE
+2) (integer) 0
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO foo(a) VALUES(1)&quot;
+1) DONE
+2) (integer) 1
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO foo VALUES(3, 4)&quot;
+1) DONE
+2) (integer) 1
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO foo VALUES(5, 6)&quot;
+1) DONE
+2) (integer) 1
+127.0.0.1:6379&gt; REDISQL.EXEC DB &quot;INSERT INTO foo VALUES(10, 19)&quot;
+1) DONE
+2) (integer) 1
+127.0.0.1:6379&gt; REDISQL.QUERY.INTO {DB}:all_foo DB &quot;SELECT * FROM foo&quot;
+1) 1) &quot;{DB}:all_foo&quot;
+   2) &quot;1549811093979-0&quot;
+   3) &quot;1549811093979-3&quot;
+   4) (integer) 4
+127.0.0.1:6379&gt; XRANGE {DB}:all_foo - +
+1) 1) &quot;1549811093979-0&quot;
+   2) 1) &quot;int:a&quot;
+      2) &quot;1&quot;
+      3) &quot;null:b&quot;
+      4) &quot;(null)&quot;
+2) 1) &quot;1549811093979-1&quot;
+   2) 1) &quot;int:a&quot;
+      2) &quot;3&quot;
+      3) &quot;int:b&quot;
+      4) &quot;4&quot;
+3) 1) &quot;1549811093979-2&quot;
+   2) 1) &quot;int:a&quot;
+      2) &quot;5&quot;
+      3) &quot;int:b&quot;
+      4) &quot;6&quot;
+4) 1) &quot;1549811093979-3&quot;
+   2) 1) &quot;int:a&quot;
+      2) &quot;10&quot;
+      3) &quot;int:b&quot;
+      4) &quot;19&quot;
+</code></pre>
+
+<p>Using a standard Redis Stream all the standard consideration applies.</p>
+<ol>
+<li>The stream is not deleted by RediSQL, hence it can definitely be used for caching, on the other hand too many streams will use memory.</li>
+<li>The stream use a standard Redis key, in a cluster environment you should be sure that the database that is executing the query and the stream that will accomodate the result are on the same cluster node. 
+This can be accomplished easily by forcing the stream name to hash to the same cluster node of the database, it is sufficiento to use a <code>stream_name</code> composed as such <code>{db_key}:what:ever:here</code>. Redis will hash only the part between the <code>{</code> and <code>}</code> in order to compute the cluster node.</li>
+<li>The result can be consumed using the standard <a href="https://redis.io/commands#stream">Redis streams commands</a>, two good starting points are <a href="https://redis.io/commands/xread"><code>XREAD</code></a> and <a href="https://redis.io/commands/xrange"><code>XRANGE</code></a>.</li>
+</ol>
+<p><strong>Complexity</strong>: The complexity of the command is <code>O(n)</code> where <code>n</code> is the amount of row returned by the query.</p>
+<p><strong>See also</strong>:</p>
+<ol>
+<li><a href="#redisqlquery"><code>REDISQL.QUERY</code></a> </li>
+<li><a href="#redisqlquery_statementinto"><code>REDISQL.QUERY_STATEMENT.INTO</code></a> </li>
+<li><a href="https://redis.io/topics/streams-intro">Redis Streams Intro</a></li>
+<li><a href="https://redis.io/commands#stream">Redis Streams Commands</a></li>
+<li><a href="https://redis.io/commands/xadd"><code>XADD</code></a></li>
+<li><a href="https://redis.io/commands/xread"><code>XREAD</code></a></li>
+<li><a href="https://redis.io/commands/xrange"><code>XRANGE</code></a></li>
 </ol>
 <h2 id="redisqlcreate_statement">REDISQL.CREATE_STATEMENT</h2>
 <h4 id="redisqlcreate_statementnow-db_key-stmt_identifier-statement">REDISQL.CREATE_STATEMENT[.NOW] db_key stmt_identifier "statement"</h4>
@@ -359,6 +482,20 @@ So if the statements is from the following query:</p>
 <li><a href="https://www.sqlite.org/c3ref/stmt_readonly.html">SQLite <code>sqlite3_stmt_readonly</code></a></li>
 <li><a href="#redisqlquery"><code>REDISQL.QUERY</code></a> </li>
 </ol>
+<h2 id="redisqlquery_statementinto">REDISQL.QUERY_STATEMENT.INTO</h2>
+<h4 id="redisqlquery_statementintonow-stream_name-db_key-stmt_identifier-binding_parameters">REDISQL.QUERY_STATEMENT.INTO[.NOW] stream_name db_key stmt_identifier [binding_parameters ...]</h4>
+<p>This command behave like <a href="#redisqlqueryinto"><code>REDISQL.QUERY.INTO</code></a> but instead of a query it takes as input a read-only statement and its binding paramenters.</p>
+<p><strong>Complexity</strong>: The complexity of the command is <code>O(n)</code> where <code>n</code> is the amount of row returned by the query.</p>
+<p><strong>See also</strong>:</p>
+<ol>
+<li><a href="#redisqlqueryinto"><code>REDISQL.QUERY.INTO</code></a> </li>
+<li><a href="#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a> </li>
+<li><a href="https://redis.io/topics/streams-intro">Redis Streams Intro</a></li>
+<li><a href="https://redis.io/commands#stream">Redis Streams Commands</a></li>
+<li><a href="https://redis.io/commands/xadd"><code>XADD</code></a></li>
+<li><a href="https://redis.io/commands/xread"><code>XREAD</code></a></li>
+<li><a href="https://redis.io/commands/xrange"><code>XRANGE</code></a></li>
+</ol>
 <h2 id="redisqldelete_statement">REDISQL.DELETE_STATEMENT</h2>
 <h4 id="redisqldelete_statementnow-db_key-stmt_identifier">REDISQL.DELETE_STATEMENT[.NOW] db_key stmt_identifier</h4>
 <p>This command eliminates a statement from the database.</p>
@@ -387,6 +524,122 @@ So if the statements is from the following query:</p>
 <li><a href="#redisqlexec_statement"><code>REDISQL.EXEC_STATEMENT</code></a></li>
 <li><a href="#redisqldelete_statement"><code>REDISQL.DELETE_STATEMENT</code></a></li>
 <li><a href="https://redis.io/topics/modules-blocking-ops">Redis Blocking Command</a></li>
+</ol>
+<h2 id="redisqlcopy">REDISQL.COPY</h2>
+<h4 id="redisqlcopynow-db_key_source-db_key_destination">REDISQL.COPY[.NOW] db_key_source db_key_destination</h4>
+<p>The command copies the source database into the destination database.</p>
+<p>The content of the destination databases is completely ignored and lost.</p>
+<p>It is not important if the databases are stored in memory or backed by disk, the <code>COPY</code> command will work nevertheless.</p>
+<p>This command is useful to:</p>
+<ol>
+<li>Create backups of databases</li>
+<li>Load data from a slow, disk based, databases into a fast in-memory one</li>
+<li>To persist data from a in-memory database into a disk based database</li>
+<li>Initialize a database with a predefined status</li>
+</ol>
+<p>Usually the destination database is an empty database just created, while the source one is a databases where we have been working for a while.</p>
+<p>This command use the <a href="https://www.sqlite.org/backup.html">backup API</a> of sqlite.</p>
+<p><strong>Complexity</strong>: The complexity is linear on the number of page (dimension) of the source database, beware it can be "slow" if the source database is big, during the copy the <code>source</code> database is busy and it cannot serve other queries. </p>
+<p><strong>See also</strong>:</p>
+<ol>
+<li><a href="https://www.sqlite.org/backup.html">Backup API</a></li>
+</ol>
+<h2 id="redisqlstatistics">REDISQL.STATISTICS</h2>
+<h4 id="redisqlstatistics_1">REDISQL.STATISTICS</h4>
+<p>The command print the internal statistics of RediSQL.</p>
+<p>There are 3 counter associated to each command. 
+The first one for counting the number of times the command is been invoked.
+The second (<code>OK</code> counter) keep tracks of how many times the command returned successfully.
+The third (<code>ERR</code> counter) memorize the amount of times the command returned an error. </p>
+<p>The counters are implemented as atomic counters, they don't use locks nor introduces any notiaceble slowdown to the application.</p>
+<pre><code>127.0.0.1:6379&gt; REDISQL.STATISTICS
+ 1) 1) &quot;CREATE_DB&quot;
+    2) (integer) 1
+ 2) 1) &quot;CREATE_DB OK&quot;
+    2) (integer) 1
+ 3) 1) &quot;CREATE_DB ERR&quot;
+    2) (integer) 0
+ 4) 1) &quot;EXEC&quot;
+    2) (integer) 4
+ 5) 1) &quot;EXEC OK&quot;
+    2) (integer) 4
+ 6) 1) &quot;EXEC ERR&quot;
+    2) (integer) 0
+ 7) 1) &quot;QUERY&quot;
+    2) (integer) 0
+ 8) 1) &quot;QUERY OK&quot;
+    2) (integer) 0
+ 9) 1) &quot;QUERY ERR&quot;
+    2) (integer) 0
+10) 1) &quot;QUERY.INTO&quot;
+    2) (integer) 0
+11) 1) &quot;QUERY.INTO OK&quot;
+    2) (integer) 0
+12) 1) &quot;QUERY.INTO ERR&quot;
+    2) (integer) 0
+13) 1) &quot;CREATE_STATEMENT&quot;
+    2) (integer) 3
+14) 1) &quot;CREATE_STATEMENT OK&quot;
+    2) (integer) 1
+15) 1) &quot;CREATE_STATEMENT ERR&quot;
+    2) (integer) 2
+16) 1) &quot;EXEC_STATEMENT&quot;
+    2) (integer) 2
+17) 1) &quot;EXEC_STATEMENT OK&quot;
+    2) (integer) 2
+18) 1) &quot;EXEC_STATEMENT ERR&quot;
+    2) (integer) 0
+19) 1) &quot;UPDATE_STATEMENT&quot;
+    2) (integer) 2
+20) 1) &quot;UPDATE_STATEMENT OK&quot;
+    2) (integer) 1
+21) 1) &quot;UPDATE_STATEMENT ERR&quot;
+    2) (integer) 1
+22) 1) &quot;DELETE_STATEMENT&quot;
+    2) (integer) 0
+23) 1) &quot;DELETE_STATEMENT OK&quot;
+    2) (integer) 0
+24) 1) &quot;DELETE_STATEMENT ERR&quot;
+    2) (integer) 0
+25) 1) &quot;QUERY_STATEMENT&quot;
+    2) (integer) 0
+26) 1) &quot;QUERY_STATEMENT OK&quot;
+    2) (integer) 0
+27) 1) &quot;QUERY_STATEMENT ERR&quot;
+    2) (integer) 0
+28) 1) &quot;QUERY_STATEMENT.INTO&quot;
+    2) (integer) 0
+29) 1) &quot;QUERY_STATEMENT.INTO OK&quot;
+    2) (integer) 0
+30) 1) &quot;QUERY_STATEMENT.INTO ERR&quot;
+    2) (integer) 0
+31) 1) &quot;COPY&quot;
+    2) (integer) 0
+32) 1) &quot;COPY OK&quot;
+    2) (integer) 0
+33) 1) &quot;COPY ERR&quot;
+    2) (integer) 0
+</code></pre>
+
+<p><strong>Complexity</strong>: The complexity is constant.</p>
+<h2 id="redisqlcopy_1">REDISQL.COPY</h2>
+<h4 id="redisqlcopynow-db_key_source-db_key_destination_1">REDISQL.COPY[.NOW] db_key_source db_key_destination</h4>
+<p>The command copies the source database into the destination database.</p>
+<p>The content of the destination databases is completely ignored and lost.</p>
+<p>It is not important if the databases are stored in memory or backed by disk, the <code>COPY</code> command will work nevertheless.</p>
+<p>This command is useful to:</p>
+<ol>
+<li>Create backups of databases</li>
+<li>Load data from a slow, disk based, databases into a fast in-memory one</li>
+<li>To persist data from a in-memory database into a disk based database</li>
+<li>Initialize a database with a predefined status</li>
+</ol>
+<p>Usually the destination database is an empty database just created, while the source one is a databases where we have been working for a while.</p>
+<p>This command use the <a href="https://www.sqlite.org/backup.html">backup API</a> of sqlite.</p>
+<p><strong>Complexity</strong>: The complexity is linear on the number of page (dimension) of the source database, beware it can be "slow" if the source database is big, during the copy the <code>source</code> database is busy and it cannot serve other queries. </p>
+<p><strong>See also</strong>:</p>
+<ol>
+<li><a href="https://www.sqlite.org/backup.html">Backup API</a></li>
 </ol>
 <h1 id="virtual-tables">Virtual Tables</h1>
 <p>What follows is not a RediSQL command but an SQLite virtual table introduced by the module.</p>
@@ -476,6 +729,7 @@ Then the columns of the table. Please note that you do <strong>not</strong> prov
         <script>var base_url = '..';</script>
         <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
         <script src="../js/base.js"></script>
+        <script src="../blog/node/hn.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
             <div class="modal-dialog">

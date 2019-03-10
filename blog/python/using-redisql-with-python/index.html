@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+
+	<title>Using RediSQL with Python - RediSQL</title>
+
+        <link href="../../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../../css/highlight.css">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-116709819-1', 'auto');
+            ga('send', 'pageview');
+        </script>
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="../../..">RediSQL</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="../../..">Overview</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../../references/">References</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../../pro/">Pro</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../../../motivations/">Motivations</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../../pro_motivations/">PRO Motivations</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Blog <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../../release_0.9.0/">Release 0.9.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../release_0.8.0/">Release 0.8.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../release_0.7.0/">Release 0.7.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../release_0.6.0/">Release 0.6.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../release_0.5.0/">Release 0.5.0</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../analytics/">Analytics</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../performances/">Double performances of RediSQL going zero copy</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Using RediSQL with Python</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../golang/using-redisql-with-golang/">Using RediSQL with Go(lang)</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../node/using-redisql-with-node/">Using RediSQL with Node.js</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                </ul>
+            
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                
+                    <li >
+                        <a rel="next" href="../../performances/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../../golang/using-redisql-with-golang/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="https://github.com/RedBeardLab/rediSQL">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#using-redisql-with-python">Using RediSQL with Python</a></li>
+        
+            <li><a href="#redisql-and-aioredis">RediSQL and aioredis</a></li>
+        
+            <li><a href="#redisql-and-redis">RediSQL and redis</a></li>
+        
+            <li><a href="#creating-a-redis-connection">Creating a Redis connection</a></li>
+        
+            <li><a href="#setting-up-redisql">Setting up RediSQL</a></li>
+        
+            <li><a href="#running-the-loop">Running the loop</a></li>
+        
+            <li><a href="#storing-the-data-into-redisql">Storing the data into RediSQL</a></li>
+        
+    
+        <li class="main "><a href="#concluding">Concluding</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="using-redisql-with-python">Using RediSQL with Python</h1>
+<p>This tutorial will help you to get start to use RediSQL with Python3.</p>
+<p>In this tutorial we will scrape the content of Hacker News using their <a href="https://github.com/HackerNews/API">API documented here</a>.</p>
+<p>We will use async python with <a href="https://docs.python.org/3/library/asyncio.html"><code>asyncio</code></a> to manage the event loop, <a href="https://github.com/aio-libs/aiohttp/"><code>aiohttp</code></a> to retrieve data from a public API and <a href="https://github.com/aio-libs/aioredis"><code>aioredis</code></a> to communicate with Redis.</p>
+<p>To follow this tutorial you will need a modern (&gt; v4.0) instance of Redis running RediSQL.
+You can obtain RediSQL from <a href="https://payhip.com/b/Ri4d">our shop</a> or from the <a href="https://github.com/RedBeardLab/rediSQL/releases">github releases</a>.</p>
+<p>To load RediSQL is sufficient to pass it as argument to the redis-server: <code>./redis-server --loadmodule /path/to/redisql.so</code></p>
+<p>The whole code show in this example is reachable <a href="https://github.com/RedBeardLab/rediSQL/blob/master/doc/docs/blog/python/src/simple.py">here</a> while we also created a <a href="https://github.com/RedBeardLab/rediSQL/blob/master/doc/docs/blog/python/src/main.py">more sophisticate example</a> that stress much more the infrastructure to show that the bottle neck is not RediSQL but python and the network.</p>
+<h2 id="redisql-and-aioredis">RediSQL and aioredis</h2>
+<p>Most Redis library implements methods to call the standard Redis command like <code>SET</code> or <code>GET</code> or <code>RPOP</code> and aioredis is not an exception.
+This is generally a problem for Redis modules like RediSQL that instead defined their own commands.
+Fortunately most libraries usually expose also a lower level method that is used to implement most of the other Redis command.
+For what concern <code>aioredis</code> the lower level method that we can use is <code>.execute</code> that is implemented for both <a href="https://aioredis.readthedocs.io/en/v1.2.0/api_reference.html#aioredis.RedisConnection.execute">single connection</a> and for a <a href="https://aioredis.readthedocs.io/en/v1.2.0/api_reference.html#aioredis.ConnectionsPool.execute">pool of connections</a>.</p>
+<p>Indeed is possible to implement all the other high level command using the low level <code>.execute</code> method.</p>
+<h2 id="redisql-and-redis">RediSQL and redis</h2>
+<p>While in this article we will talk about <code>aioredis</code>, another, not asynchronous library for using Redis with python is <a href="https://pypi.org/project/redis/"><code>redis</code> library</a>.</p>
+<p>In the <code>redis</code> library, the low level method is <code>.execute_command</code> and not <code>.execute</code> as for <code>aioredis</code>, other than this difference everything will apply just the same.</p>
+<h2 id="creating-a-redis-connection">Creating a Redis connection</h2>
+<p>The very first thing to do is to connect to Redis, in our case we use a connection pool that has the same interface of a simple connection but is backed by a pool of different connections.</p>
+<p>Creating the pool can be done like so:</p>
+<pre><code class="python">loop = asyncio.get_event_loop()
+conn_co = aioredis.create_pool('redis://localhost', minsize=10, maxsize=300, loop = loop)
+redis_co = asyncio.gather(*[conn_co])
+redis = loop.run_until_complete(redis_co)
+redis = redis[0]
+</code></pre>
+
+<p>and now the variable <code>redis</code> refer to a <code>aioredis</code> pool.</p>
+<p>When we will need a new connection, the pool will either give us an idle connection or open a new connection to Redis and give us the new one.</p>
+<h2 id="setting-up-redisql">Setting up RediSQL</h2>
+<p>Now that we have a pool of connections before to get the data into RediSQL we need to set up RediSQL.
+The first step is to create a database in RediSQL, this can be done easily with a call like</p>
+<pre><code class="python">await redis.execute(&quot;REDISQL.CREATE_DB&quot;, &quot;HN&quot;)
+</code></pre>
+
+<p>this call will create a new RediSQL database and it will call it <code>HN</code>. If the key <code>HN</code> already exists the call will return an error.</p>
+<p>The next step is to create the structure to hold our data. In our case we will stick to something simple, a single table where we store the identifier of each item (comment or story) from HN, the author of such item, when the item was created and finally we will store the whole item as json structure in a text field.</p>
+<pre><code class="python">query = &quot;&quot;&quot;CREATE TABLE IF NOT EXISTS hn(id integer primary key, author text, time int, item text);&quot;&quot;&quot;
+await redis.execute(&quot;REDISQL.EXEC&quot;, &quot;HN&quot;, query) 
+</code></pre>
+
+<p>Finally, since we storing data from the open internet inside our database, is wise to create an SQL statement to execute when doing an insert.
+The advantage of the statement is that is safe from SQL injections and is usually faster than re-compile the same query each time.</p>
+<p>To create a statement we can proceed as following:</p>
+<pre><code class="python">statement = &quot;INSERT INTO hn VALUES(?1, ?2, ?3, json(?4));&quot;
+await redis.execute(&quot;REDISQL.CREATE_STATEMENT&quot;, &quot;HN&quot;, &quot;insert_item&quot;, statement)
+</code></pre>
+
+<p>The last command create a new statement in the <code>HN</code> database and associate it with the string <code>insert_item</code> so that we can refer to it later.</p>
+<p>Also note the use of the <code>json(?4)</code> function, this is a function provided by the <a href="https://www.sqlite.org/json1.html">JSON1 module</a> of SQLite and exposed by RediSQL that allow fast and efficient manipulation of json object. 
+Using the JSON1 module is possible to have a lot of flexibility even inside a rigid SQL schema.</p>
+<p>Is usually wise to wrap those command into a <code>try: except:</code> block. Hence the final function will look like this:</p>
+<pre><code class="python">async def set_up(redis):
+    try:
+        await redis.execute(&quot;REDISQL.CREATE_DB&quot;, &quot;HN&quot;)
+    except Exception as e:
+        print(e)
+
+    query = &quot;&quot;&quot;CREATE TABLE IF NOT EXISTS hn(id integer primary key, author text, time int, item text);&quot;&quot;&quot;
+    try:
+        await redis.execute(&quot;REDISQL.EXEC&quot;, &quot;HN&quot;, query)
+    except Exception as e:
+        print(e)
+
+    statement = &quot;INSERT INTO hn VALUES(?1, ?2, ?3, json(?4));&quot;
+    try:
+        await redis.execute(&quot;REDISQL.CREATE_STATEMENT&quot;, &quot;HN&quot;, &quot;insert_item&quot;, statement)
+    except Exception as e:
+        print(e)
+</code></pre>
+
+<h2 id="running-the-loop">Running the loop</h2>
+<p>Now that we have set up our environment we can go on and start to listen for new items posted on HN.</p>
+<p>The API provides a simple endpoint <a href="https://hacker-news.firebaseio.com/v0/maxitem.json"><code>maxitem.json</code></a> that returns the id of the latest item posted on HN.
+When the loop start we get maxitem and we store it into Redis. 
+Then, when the maxitem get updated we download each of the items between the <code>old maxitem</code> and the <code>new maxitem</code>. </p>
+<p>We repeat the loop forever with a sleep to avoid hammering the API endpoint.</p>
+<pre><code class="python">async def main(redis, http):
+    max_item = await get_max_item(http)
+    await redis.execute(&quot;SET&quot;, &quot;max-item&quot;, max_item)
+    old_max_item = max_item
+    while True:
+        # we download the new maxitem
+        max_item = await get_max_item(http)
+        # if the new maxitem is actually bigger than the old one
+        if max_item &gt; old_max_item:
+            # for each new item...
+            for i in range(old_max_item, max_item):
+                # we start a new Task that store the item in our database
+                store = store_item(http, redis, str(i))
+                asyncio.ensure_future(store)
+            await redis.execute(&quot;SET&quot;, &quot;max-item&quot;, max_item)
+            old_max_item = max_item
+        asyncio.sleep(1)
+</code></pre>
+
+<h2 id="storing-the-data-into-redisql">Storing the data into RediSQL</h2>
+<p>The last interesting bit is about the <code>store_item</code> function that is the one that download the item from the API and store it into RediSQL.</p>
+<pre><code class="python">async def store_item(http, redis, item_id):
+    item = await get_hn_item(http, item_id)
+    await store_on_db(redis, item)
+
+async def get_hn_item(http, item_id):
+    while True:
+        async with http.get(get_item_url(item_id)) as item:
+            if 200 &lt;= item.status &lt; 300:
+                data = await item.text()
+                item = json.loads(data)
+                if item:
+                    return item
+
+# In this function we store the item into the RediSQL database
+async def store_on_db(redis, item):
+    try:
+        # execute the statement passing the necessary parameters
+        await redis.execute(&quot;REDISQL.EXEC_STATEMENT&quot;, &quot;HN&quot;, &quot;insert_item&quot;, 
+                item[&quot;id&quot;], item.get(&quot;by&quot;, &quot;_no_author_&quot;), item[&quot;time&quot;], json.dumps(item))
+    except Exception as e:
+        print(e)
+        print(item[&quot;id&quot;])
+</code></pre>
+
+<p>Downloading the item from the API is a simple HTTP GET request, then we simply check if it returns a successful status code and that it actually returns valid json.</p>
+<p>Finally to store the element into RediSQL we execute the statement that we have create before during the set up phase.
+Indeed we are executing the command <code>REDISQL.EXEC_STATEMENT HN insert_item $item_id $item_author $item_time $item</code>.
+This command will find inside the database <code>HN</code> the statement <code>insert_item</code> that we have previously defined as <code>INSERT INTO hn VALUES(?1, ?2, ?3, json(?4));</code>.
+Now the item id will be substituted to <code>?1</code>, the item author will substitute <code>?2</code>, the creation time of the item will take the place of <code>?3</code> and the whole json string of the item will substitute <code>?4</code>, finally the statement is executed agains RediSQL and its result returned.</p>
+<p>If everything went right, we have just added our first row to the database using async python.</p>
+<h1 id="concluding">Concluding</h1>
+<p>In this tutorial we took a rather simple problem and we use it to show how to use RediSQL with async python.</p>
+<p>We started by setting up the database, we show how to create a database and tables inside it. Then we also show how to create statements to avoid SQL injections attack and improve the efficiency of repeated queries.</p>
+<p>Then we obtain the data from the Hacker News API and we show how to insert the data into RediSQL using the statement that we have just created.</p>
+<p>Hopefully this tutorial will be helpful and sufficient to get started, but if you have any question feel free to get in touch or to open an issue.</p>
+<p>If you wish to see a similar tutorial for a different language, <a href="https://github.com/RedBeardLab/rediSQL/issues/new">open an issue on github.</a></p></div>
+            
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+
+        <script src="../../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../../js/highlight.pack.js"></script>
+        <script>var base_url = '../../..';</script>
+        <script data-main="../../../mkdocs/js/search.js" src="../../../mkdocs/js/require.js"></script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../blog/node/hn.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

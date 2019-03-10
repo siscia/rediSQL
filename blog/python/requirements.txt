@@ -1,0 +1,10 @@
+aiohttp==2.3.10
+aioredis==1.2.0
+async-timeout==2.0.1
+chardet==3.0.4
+hiredis==1.0.0
+idna==2.8
+idna-ssl==1.1.0
+multidict==4.5.2
+pkg-resources==0.0.0
+yarl==1.2.0
