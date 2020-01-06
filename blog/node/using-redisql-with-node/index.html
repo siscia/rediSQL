@@ -81,23 +81,8 @@
                 
                 
                 
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../../../motivations/">Motivations</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../../../pro_motivations/">PRO Motivations</a>
-</li>
-
-                        
-                        </ul>
+                    <li >
+                        <a href="../../../motivations/">Motivations</a>
                     </li>
                 
                 
@@ -176,6 +161,12 @@
                     </li>
                 
                 
+                
+                    <li >
+                        <a href="../../../faq/">FAQ</a>
+                    </li>
+                
+                
                 </ul>
             
 
@@ -191,8 +182,8 @@
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li class="disabled">
-                        <a rel="prev" >
+                    <li >
+                        <a rel="prev" href="../../../faq/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -245,7 +236,7 @@
 <p>To follow this tutorial you will need a modern (&gt; v4.0) instance of Redis running RediSQL.
 You can obtain RediSQL from <a href="https://payhip.com/b/Ri4d">our shop</a> or from the <a href="https://github.com/RedBeardLab/rediSQL/releases">github releases</a>.</p>
 <p>To load RediSQL is sufficient to pass it as argument to the redis-server: <code>./redis-server --loadmodule /path/to/redisql.so</code></p>
-<p>The whole code show in this example is reachable <a href="https://github.com/RedBeardLab/rediSQL/blob/master/doc/docs/blog/node/hn.js">here</a></p>
+<p>The whole code show in this example is reachable <a href="https://github.com/RedBeardLab/rediSQL/blob/master/doc/docs/blog/node/hn.js">here.</a></p>
 <h2 id="dependencies">Dependencies</h2>
 <p>The first step is always to load the dependencies, for this little script we will need just 3 dependencies:</p>
 <ol>
@@ -362,7 +353,7 @@ A much quicker set up, especially for testing, than using classical databases as
 <li>statements <code>REDISQL.CREATE_STATEMENT $db_name $query_name "SELECT * FROM ... WHERE foo = ?1"</code> and the <code>REDISQL.QUERY_STATEMENTS $db_name $query_name "paramenters"</code></li>
 <li>simple exec <code>REDISQL.EXEC $db_name "SELECT * FROM ... etc"</code></li>
 </ul>
-<p>Feel free to explore our <a href="../../../../references">references documentation</a> to understand better what capabilities RediSQL provides you.</p>
+<p>Feel free to explore our <a href="../../../references">references documentation</a> to understand better what capabilities RediSQL provides you.</p>
 <p>The complete code of this example is <a href="https://github.com/RedBeardLab/rediSQL/blob/master/doc/docs/blog/node/hn.js">available here.</a></p>
 <p>If you wish to see a similar tutorial for a different language, <a href="https://github.com/RedBeardLab/rediSQL/issues/new">open an issue on github.</a></p></div>
             

@@ -81,23 +81,8 @@
                 
                 
                 
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Motivations <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                        
-                            
-<li >
-    <a href="../motivations/">Motivations</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="../pro_motivations/">PRO Motivations</a>
-</li>
-
-                        
-                        </ul>
+                    <li >
+                        <a href="../motivations/">Motivations</a>
                     </li>
                 
                 
@@ -176,6 +161,12 @@
                     </li>
                 
                 
+                
+                    <li >
+                        <a href="../faq/">FAQ</a>
+                    </li>
+                
+                
                 </ul>
             
 
@@ -221,6 +212,8 @@
         
             <li><a href="#main-difference">Main difference</a></li>
         
+            <li><a href="#telemetrics-data">Telemetrics data</a></li>
+        
     
     </ul>
 </div></div>
@@ -229,40 +222,14 @@
 <h1 id="redisql-pro">RediSQL PRO</h1>
 <p>This document explains the architecture and principle of working of RediSQL PRO.</p>
 <p>You can purchase RediSQL PRO, along with support <a href="https://plasso.com/s/epp4GbsJdp-redisql/signup/"><strong>here.</strong></a></p>
-<p>Motivation and details about the cost are <a href="../pro_motivations/">described here</a>.</p>
 <h2 id="main-difference">Main difference</h2>
-<p>The PRO version offers two main features: <strong>non blocking command</strong> and <strong>replication</strong></p>
-<h3 id="non-blocking-command">Non-blocking command</h3>
-<p>Most command in RediSQL, all but <code>REDISQL.CREATE_DB</code>, are blocking command.</p>
-<p>This means that Redis block the client, pass the command to a background thread that actually executed it and finally the result is returned to client unblocking it.</p>
-<p>This works great in most cases, the main thread of Redis is free of doing other work (like answering standard redis command), there is no difference from the client point of view and your machine can use more than the single thread of redis to work for you.</p>
-<p>However, sometimes you want to have non-blocking commands.</p>
-<p>The blocking command will be executed in the main redis thread, this means that no other works will be done by Redis while executing your command.</p>
-<p>We could expect the non-blocking command to be slightly faster (smaller latency) than the blocking one since there is no need for coordination between threads.</p>
-<p>Finally, non-blocking commands are necessary for replication.</p>
-<p>Non-blocking commands are invoke adding the <code>.NOW</code> suffix.</p>
-<p>As an example, instead of <code>REDISQL.EXEC</code> that is a blocking command you can use <code>REDISQL.EXEC.NOW</code> to use the non-blocking version.</p>
-<h4 id="when-to-use-non-blocking-commands">When to use non-blocking commands</h4>
-<p>Non-blocking command takes the priority over blocking one.</p>
-<p>Said so, generally, we are expecting users to use mostly the blocking commands.</p>
-<p>However, if you need a very quick insert or a very quick lookup, then you should use the non-blocking version.</p>
-<p>It is a bad idea to use non blocking commands for slow statements/query.</p>
-<p>This because while you are executing a non-blocking command the main redis thread cannot do anything else, this means it cannot answer other redis commands.</p>
-<h3 id="replication">Replication</h3>
-<p>Redis offers two main methods for persisting data on disk so that in case of power failure of disastrous failure your data are reasonably safe.</p>
-<p>RediSQL implement RDB persistency on the community version and AOF replication on the PRO version.</p>
-<p>For the details of this two method, I suggest to read the Redis Documentation <a href="https://redis.io/topics/persistence">on this page</a>.</p>
-<p>The mechanism behind AOF replication is exactly the same behind cluster replication used by redis. The same <strong>bytes</strong> used for AOF replication are also used for cluster replication, just send over different sockets.</p>
-<p>For details about cluster replication you can consult the official Redis Documentation on <a href="https://redis.io/topics/cluster-tutorial">cluster</a> and on <a href="https://redis.io/topics/replication">replication</a></p>
-<p>The PRO version, indeed, implements both AOF and cluster replication.</p>
-<h4 id="effective-use-of-replication">Effective use of Replication</h4>
-<p>In order to use replication effectively, you should understand a few simple concepts.</p>
-<p>If a command is replicated it means that it could be re-executed.</p>
-<p>It is <strong>vital</strong> to replicate commands that change the data you are storing, however, is pointless and wasteful to replicate commands that do not apply any change to the data.</p>
-<p>You definitely want to replicate every INSERTs, UPDATEs or DELETEs while you should avoid replicating SELECTs.</p>
-<p>Replicated commands are usually executed either when you are re-loading your dataset after some sort of failures or in slaves/replica with a train of other replicated commands is coming right after.</p>
-<p>Consider what happens if you replicate a big SELECT. RediSQL is going to execute it and it is going to take some time, this while your application is waiting for redis to restart or when a train of replicated commands are piling up in the slaves/replicas buffers. And all this just for discard the result of the SELECT itself.</p>
-<p>In order to avoid this effect is a good idea to use the query commands whenever possible (<a href="../references/#redisqlquery"><code>REDISQL.QUERY</code></a> and <a href="../references/#redisqlquery_statement"><code>REDISQL.QUERY_STATEMENT</code></a>), this command <strong>do not</strong> replicate and are marked as <code>readonly</code> which means that can be executed also on slaves/replicas providing interesting primitives of load balancing. (Eg. You could write on the master and read on the slaves.)</p></div>
+<p>The PRO version comes without telemetrics.</p>
+<p>The community version requires RediSQL to periodically send telemetrics information to our server otherwise RediSQL shut itself down.
+This is not require by the PRO version.</p>
+<h2 id="telemetrics-data">Telemetrics data</h2>
+<p>The data send to our servers are definitely not critical data, indeed we ship the result of the <code>REDISQL.STATISTICS</code> commands.
+Moreover we took all the precaution to make sure that our user are not impacted by possible errors on our side replicating all pieces of our infrastructure. <a href="http://redbeardlab.com/2019/04/09/telemetrics-for-redisql/">More details about the technical implementation on our blog.</a></p>
+<p><a href="http://redbeardlab.com/2019/04/09/redisql-release-1-0-0-change-in-strategy-and-business-model/">More details behind our motivation in our blog post.</a></p></div>
             
         </div>
 

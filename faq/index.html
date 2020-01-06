@@ -7,14 +7,14 @@
         
         
         
-        <link rel="shortcut icon" href="./img/favicon.ico">
+        <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>RediSQL</title>
+	<title>FAQ - RediSQL</title>
 
-        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link href="./css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="./css/highlight.css">
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -53,7 +53,7 @@
             
 
             <!-- Main title -->
-            <a class="navbar-brand" href=".">RediSQL</a>
+            <a class="navbar-brand" href="..">RediSQL</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -64,25 +64,25 @@
                 
                 
                     <li >
-                        <a href=".">Overview</a>
+                        <a href="..">Overview</a>
                     </li>
                 
                 
                 
                     <li >
-                        <a href="references/">References</a>
+                        <a href="../references/">References</a>
                     </li>
                 
                 
                 
                     <li >
-                        <a href="pro/">Pro</a>
+                        <a href="../pro/">Pro</a>
                     </li>
                 
                 
                 
                     <li >
-                        <a href="motivations/">Motivations</a>
+                        <a href="../motivations/">Motivations</a>
                     </li>
                 
                 
@@ -93,67 +93,67 @@
                         
                             
 <li >
-    <a href="blog/release_0.9.0/">Release 0.9.0</a>
+    <a href="../blog/release_0.9.0/">Release 0.9.0</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/release_0.8.0/">Release 0.8.0</a>
+    <a href="../blog/release_0.8.0/">Release 0.8.0</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/release_0.7.0/">Release 0.7.0</a>
+    <a href="../blog/release_0.7.0/">Release 0.7.0</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/release_0.6.0/">Release 0.6.0</a>
+    <a href="../blog/release_0.6.0/">Release 0.6.0</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/release_0.5.0/">Release 0.5.0</a>
+    <a href="../blog/release_0.5.0/">Release 0.5.0</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/analytics/">Analytics</a>
+    <a href="../blog/analytics/">Analytics</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
+    <a href="../blog/JaaS/">JSON on Redis using RediSQL, SQL steroids for Redis</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/performances/">Double performances of RediSQL going zero copy</a>
+    <a href="../blog/performances/">Double performances of RediSQL going zero copy</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/python/using-redisql-with-python/">Using RediSQL with Python</a>
+    <a href="../blog/python/using-redisql-with-python/">Using RediSQL with Python</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/golang/using-redisql-with-golang/">Using RediSQL with Go(lang)</a>
+    <a href="../blog/golang/using-redisql-with-golang/">Using RediSQL with Go(lang)</a>
 </li>
 
                         
                             
 <li >
-    <a href="blog/node/using-redisql-with-node/">Using RediSQL with Node.js</a>
+    <a href="../blog/node/using-redisql-with-node/">Using RediSQL with Node.js</a>
 </li>
 
                         
@@ -162,8 +162,8 @@
                 
                 
                 
-                    <li >
-                        <a href="faq/">FAQ</a>
+                    <li class="active">
+                        <a href="./">FAQ</a>
                     </li>
                 
                 
@@ -177,8 +177,8 @@
                     </a>
                 </li>
                 
-                    <li class="disabled">
-                        <a rel="next" >
+                    <li >
+                        <a rel="next" href="../blog/node/using-redisql-with-node/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
@@ -205,15 +205,40 @@
 
         <div class="container">
             
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#faq">FAQ</a></li>
+        
+            <li><a href="#common-answer-and-mistake-quickly-solved">Common answer and mistake quickly solved</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
 
-    <div class="row-fluid">
-      <div id="main-content" class="span12">
-        <h1 id="404-page-not-found" style="text-align: center">404</h1>
-        <p style="text-align: center"><strong>Page not found</strong></p>
-      </div>
-    </div>
+<h1 id="faq">FAQ</h1>
+<h2 id="common-answer-and-mistake-quickly-solved">Common answer and mistake quickly solved</h2>
+<h3 id="err-error-the-key-is-empty">ERR - Error the key is empty</h3>
+<p>You try to execute a command against a database like</p>
+<pre><code>REDISQL.EXEC DB-EXAMPLE &quot;SELECT 1;&quot;
+</code></pre>
 
+<p>and RediSQL returns the error: <code>ERR - Error the key is empty</code>.</p>
+<p>Most likely the dabatase <code>DB-EXAMPLE</code> does not exists. To fix the problem you can simply create first the database with</p>
+<pre><code>REDISQL.CREATE_DB DB-EXAMPLE
+</code></pre>
 
+<p>During development is quite convenient to just delete everything from RediSQL, so it may happens that you encounter this error.
+A possible solution is to always invoke the <code>REDISQL.CREATE_DB</code> command, if the database is not there, it will be created, if the database is already there an error will be raise. As long as you are in a development environment just ignore the error.</p>
+<h3 id="readonly-you-cant-write-against-a-read-only-replica">READONLY You can't write against a read only replica.</h3>
+<p>Redis and RediSQL supports <strong>replication</strong>. You can have the same database in different redis instance, on different processes and potentially on different machine.
+This means that you can read data from different instances in parallel, greatly improving reading performances.
+However you cannot write in parallel to different instances, otherwise we wouldn't know what data is "real". You can write only to the master instance.</p>
+<p>By policy the <code>REDISQL.EXEC</code> command allow you to read and write and (due to Redis limitation) you cannot use this command on replicas. The <code>REDISQL.EXEC</code> command works only on the master node. This is true even if the query that you are trying to execute is an very simple read only query like <code>SELECT 1;</code>, you cannot <code>REDISQL.EXEC</code> against a replica node.</p>
+<p>In order to read from the replicas, you can use the <code>REDISQL.QUERY</code> family of commands. This command is allowed to only read data, without modifying the database, hence you can use it also in the replica instances. Moreover it is a good idea to use it also against the master instance whenever is possible.</p>
+<p>If you try to execute the <code>REDISQL.EXEC</code> command against a replica you will get the error <code>READONLY You can't write against a read only replica</code>. To query the replicas use the <code>REDISQL.QUERY</code> command.</p></div>
+            
         </div>
 
         <footer class="col-md-12">
@@ -222,13 +247,13 @@
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
 
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script>
-        <script>var base_url = '.';</script>
-        <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
-        <script src="./js/base.js"></script>
-        <script src="./blog/node/hn.js"></script>
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
+        <script src="../blog/node/hn.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
             <div class="modal-dialog">
