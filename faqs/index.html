@@ -9,7 +9,7 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>Pro - RediSQL</title>
+	<title>FAQs - RediSQL</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -75,8 +75,8 @@
                 
                 
                 
-                    <li class="active">
-                        <a href="./">Pro</a>
+                    <li >
+                        <a href="../pro/">Pro</a>
                     </li>
                 
                 
@@ -162,8 +162,8 @@
                 
                 
                 
-                    <li >
-                        <a href="../faqs/">FAQs</a>
+                    <li class="active">
+                        <a href="./">FAQs</a>
                     </li>
                 
                 
@@ -178,12 +178,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../references/">
+                        <a rel="next" href="../blog/node/using-redisql-with-node/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../motivations/">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -208,28 +208,36 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#redisql-pro">RediSQL PRO</a></li>
+        <li class="main active"><a href="#faqs">FAQs</a></li>
         
-            <li><a href="#main-difference">Main difference</a></li>
-        
-            <li><a href="#telemetrics-data">Telemetrics data</a></li>
+            <li><a href="#common-answer-and-mistake-quickly-solved">Common answer and mistake quickly solved</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="redisql-pro">RediSQL PRO</h1>
-<p>This document explains the architecture and principle of working of RediSQL PRO.</p>
-<p>You can purchase RediSQL PRO, along with support <a href="https://plasso.com/s/epp4GbsJdp-redisql/signup/"><strong>here.</strong></a></p>
-<h2 id="main-difference">Main difference</h2>
-<p>The PRO version comes without telemetrics.</p>
-<p>The community version requires RediSQL to periodically send telemetrics information to our server otherwise RediSQL shut itself down.
-This is not require by the PRO version.</p>
-<h2 id="telemetrics-data">Telemetrics data</h2>
-<p>The data send to our servers are definitely not critical data, indeed we ship the result of the <code>REDISQL.STATISTICS</code> commands.
-Moreover we took all the precaution to make sure that our user are not impacted by possible errors on our side replicating all pieces of our infrastructure. <a href="http://redbeardlab.com/2019/04/09/telemetrics-for-redisql/">More details about the technical implementation on our blog.</a></p>
-<p><a href="http://redbeardlab.com/2019/04/09/redisql-release-1-0-0-change-in-strategy-and-business-model/">More details behind our motivation in our blog post.</a></p></div>
+<h1 id="faqs">FAQs</h1>
+<h2 id="common-answer-and-mistake-quickly-solved">Common answer and mistake quickly solved</h2>
+<h3 id="err-error-the-key-is-empty">ERR - Error the key is empty</h3>
+<p>You try to execute a command against a database like</p>
+<pre><code>REDISQL.EXEC DB-EXAMPLE &quot;SELECT 1;&quot;
+</code></pre>
+
+<p>and RediSQL returns the error: <code>ERR - Error the key is empty</code>.</p>
+<p>Most likely the dabatase <code>DB-EXAMPLE</code> does not exists. To fix the problem you can simply create first the database with</p>
+<pre><code>REDISQL.CREATE_DB DB-EXAMPLE
+</code></pre>
+
+<p>During development is quite convenient to just delete everything from RediSQL, so it may happens that you encounter this error.
+A possible solution is to always invoke the <code>REDISQL.CREATE_DB</code> command, if the database is not there, it will be created, if the database is already there an error will be raise. As long as you are in a development environment just ignore the error.</p>
+<h3 id="readonly-you-cant-write-against-a-read-only-replica">READONLY You can't write against a read only replica.</h3>
+<p>Redis and RediSQL supports <strong>replication</strong>. You can have the same database in different redis instance, on different processes and potentially on different machine.
+This means that you can read data from different instances in parallel, greatly improving reading performances.
+However you cannot write in parallel to different instances, otherwise we wouldn't know what data is "real". You can write only to the master instance.</p>
+<p>By policy the <code>REDISQL.EXEC</code> command allow you to read and write and (due to Redis limitation) you cannot use this command on replicas. The <code>REDISQL.EXEC</code> command works only on the master node. This is true even if the query that you are trying to execute is an very simple read only query like <code>SELECT 1;</code>, you cannot <code>REDISQL.EXEC</code> against a replica node.</p>
+<p>In order to read from the replicas, you can use the <code>REDISQL.QUERY</code> family of commands. This command is allowed to only read data, without modifying the database, hence you can use it also in the replica instances. Moreover it is a good idea to use it also against the master instance whenever is possible.</p>
+<p>If you try to execute the <code>REDISQL.EXEC</code> command against a replica you will get the error <code>READONLY You can't write against a read only replica</code>. To query the replicas use the <code>REDISQL.QUERY</code> command.</p></div>
             
         </div>
 
