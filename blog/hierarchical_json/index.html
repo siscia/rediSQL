@@ -9,7 +9,7 @@
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
 
-	<title>Double performances of RediSQL going zero copy - RediSQL</title>
+	<title>Hierarchical JSON with SQLite/RediSQL - RediSQL</title>
 
         <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -140,8 +140,8 @@
 
                         
                             
-<li class="active">
-    <a href="./">Double performances of RediSQL going zero copy</a>
+<li >
+    <a href="../performances/">Double performances of RediSQL going zero copy</a>
 </li>
 
                         
@@ -164,8 +164,8 @@
 
                         
                             
-<li >
-    <a href="../hierarchical_json/">Hierarchical JSON with SQLite/RediSQL</a>
+<li class="active">
+    <a href="./">Hierarchical JSON with SQLite/RediSQL</a>
 </li>
 
                         
@@ -190,12 +190,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../JaaS/">
+                        <a rel="next" href="../node/using-redisql-with-node/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../python/using-redisql-with-python/">
+                        <a rel="prev" href="../../faqs/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -220,78 +220,126 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#doubling-the-performances-of-redisql-sql-steroids-for-redis">Doubling the performances of RediSQL, SQL steroids for Redis.</a></li>
-        
-            <li><a href="#redisql-provides-sql-steroids-for-redis">RediSQL provides SQL steroids for Redis</a></li>
-        
-            <li><a href="#background">Background</a></li>
-        
-            <li><a href="#the-complains">The complains</a></li>
-        
-            <li><a href="#looking-for-the-causes">Looking for the causes</a></li>
-        
-            <li><a href="#the-problem">The problem</a></li>
-        
-            <li><a href="#need-for-speed">Need for Speed</a></li>
-        
-            <li><a href="#result">Result</a></li>
-        
-            <li><a href="#wrapping-up">Wrapping up</a></li>
-        
-            <li><a href="#looking-for-beta-tester">Looking for beta tester</a></li>
+        <li class="main active"><a href="#hierarchical-json-and-redisql">Hierarchical JSON and RediSQL</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="doubling-the-performances-of-redisql-sql-steroids-for-redis">Doubling the performances of RediSQL, SQL steroids for Redis.</h1>
-<h4 id="redisql-provides-sql-steroids-for-redis">RediSQL provides SQL steroids for Redis</h4>
-<p>RediSQL is a redis module that embeds SQLite to provide full SQL capabilities to redis.</p>
-<p>The fastest introduction to RediSQL is <a href="../../">our homepage</a></p>
-<p>tl;dr; We double the performance of RediSQL switching to a zero-copy use of the input arguments.</p>
-<h2 id="background">Background</h2>
-<p>During the development of RediSQL we always kept in mind performance, but only up to a degree.</p>
-<p>As Donal Knuth says "premature optimization is the root of all evil", but he also added, "Yet we should not pass up our opportunities in that critical 3%."</p>
-<p>For us not pass up opportunities was more about using the correct data structure and algorithm when and where they make sense.</p>
-<p>Overall the performances were quite good, on my old personal machine I could get 30k/inserts per second in a very simple table (few numeric value and small texts).</p>
-<p>This number is really small compared to Redis that can <code>SET</code> keys up to 100k/set per second, but we are also doing more work and we have always considered this figures good enough, at least as long as nobody complains.</p>
-<h2 id="the-complains">The complains</h2>
-<p><em>Fortunately</em> somebody <a href="https://github.com/RedBeardLab/rediSQL/issues/29#issuecomment-382199622">complains about the insertion rates</a>.</p>
-<p>His requirements were a little different from the assumption that we had when testing the performance. He needed to insert a lot of data ~100kB in each row. And to do it fast.</p>
-<p>First tests were not so good, showing just 2000 insertions per second. Definitely not good.</p>
-<h2 id="looking-for-the-causes">Looking for the causes</h2>
-<p>Rust, the system language in which RediSQL is built, is peculiar in the management of memory.</p>
-<p>The type system must be sure that every reference that you are using is valid and that you will never deference stuff out of your memory space.</p>
-<p>Of course, this gives you a lot of safety but introduces quite a bit of complexity.</p>
-<p>Fortunately, there are ways to manage this complexity: is possible to trade complexity for performances or, the other way around, performances for complexity.</p>
-<p>High complexity with high performance means that you are using references (pointers) everywhere it is possible, so you never copy memory around if it is not necessary, you pass a pointer to that memory location and the type system assure you that it is safe to deference such pointer.</p>
-<p>Low complexity with low performance implies to copy areas of memory multiple times so that the type system is always happy. Instead of using a pointer to a piece of memory I will just copy everything I need and pass it around functions.</p>
-<p>Since the product was new, it made sense for us to get as low complexity as possible in such a way that it is possible to move faster understanding what our clients need and what we want to build.</p>
-<p>Until now.</p>
-<h2 id="the-problem">The problem</h2>
-<p>The biggest problem we identified was that we were copying all the input parameter, so when a client was sending as a request like <code>REDISQL.EXEC_STATEMENT DB insert 1 2 3</code> we were copying 6 (insert) + 3 (1, 2, 3) = 9 bytes of memory.</p>
-<p>(Redis string are a little particular since they don't have a null '\0' terminator and carry along their size.)</p>
-<p>Nobody will complain about copying just ~10 bytes of memory, especially using slab allocator it is still some work but it is quite fast to do.</p>
-<p>However, when we start to ingest 100k bytes this will really impact negatively the performance.</p>
-<h2 id="need-for-speed">Need for Speed</h2>
-<p>We could get away with just copying and freeing few bytes, especially using jemalloc, however as soon as the payload start increasing in size copying it every time started to impact negatively the performance of the module.</p>
-<p>Was time to buy some performances paying our share price in complexity.</p>
-<p>The process was a little complex because the data lived outside the Rust code, inside Redis itself.
-It was necessary to use <code>unsafe</code> code that in normal Rust you can avoid, but finally, we were able to see the Redis string as a slice (array) of chars and get a reference to it to pass around.</p>
-<h2 id="result">Result</h2>
-<p>Before to release the code I obviously tested it. I used a c4.8xlarge from AWS.</p>
-<p>That machine before the patch could ingest 4000 request / second each of ~100k bytes. After the patch, it was able to get 8000 requests/second.</p>
-<p>Finally, the latency was pretty much the same with the 99.9 percentile at ~50 milliseconds.</p>
-<p>Xin, the gentleman who brought the issues to our attention, went even further setting several parameters available in <code>redis-benchmark</code>, notably the number of pipelined requests, and he reached 17000 requests per second.</p>
-<p>Being conservative we can claim that our works made redisql twice (from 4000 req/s to 8000 req/s) as fast at ingesting big amount of data.</p>
-<p>It is definitely necessary more testing to see the impact on different workloads, smaller payload. Fortunately, our preliminary results seem quite good.</p>
-<h2 id="wrapping-up">Wrapping up</h2>
-<p>We showed how was possible to get a lot of performance out of Rust and RediSQL switching to a zero copy approach.</p>
-<p>We also showed that our solution is very efficient, being able to ingest 800 MB / s of data without any sort of tuning.</p>
-<h2 id="looking-for-beta-tester">Looking for beta tester</h2>
-<p>We are looking also for tester for the PRO version of RediSQL, if you would like to test the PRO module without paying anything this is your occasion.
-You can either open an issues on github or write me (siscia) directly (email on github).</p></div>
+<h1 id="hierarchical-json-and-redisql">Hierarchical JSON and RediSQL</h1>
+<p>RediSQL is compiled including the <a href="https://www.sqlite.org/json1.html">JSON1</a> SQLite extensions. Hence, all the functions documented in <a href="https://www.sqlite.org/json1.html">JSON1</a> are available out of the box.</p>
+<p>JSON1 is extremely flexible and powerful, as an example consider a report table that track sales in a company  by year, quarter and week.</p>
+<pre><code>&gt; REDISQL.CREATE_DB DB
+&gt; REDISQL.EXEC DB &quot;CREATE TABLE sales(year STRING, quarter STRING, week STRING, total INT);&quot;
+&gt; REDISQL.EXEC DB &quot;INSERT INTO sales VALUES('2019', 'q1', '1', 100);&quot;
+&gt; REDISQL.EXEC DB &quot;INSERT INTO sales VALUES('2019', 'q1', '2', 125);&quot;
+&gt; REDISQL.EXEC DB &quot;INSERT INTO sales VALUES('2019', 'q2', '1', 200);&quot; 
+&gt; REDISQL.EXEC DB &quot;INSERT INTO sales VALUES('2019', 'q2', '2', 300);&quot; 
+&gt; REDISQL.EXEC DB &quot;INSERT INTO sales VALUES('2020', 'q1', '1', 400);&quot; 
+&gt; REDISQL.EXEC DB &quot;INSERT INTO sales VALUES('2020', 'q1', '2', 450);&quot; 
+&gt; REDISQL.EXEC DB &quot;INSERT INTO sales VALUES('2020', 'q2', '1', 500);&quot; 
+</code></pre>
+
+<p>From this table we would like to generate a JSON report in the form:</p>
+<pre><code>{'2019': 
+  {'q1': {'1': 100, '2': 125}, 
+   'q2': {'1': 200, '2': 300}}, 
+ '2020': 
+  {'q1': {'1': 400, '2': 450}, 
+   'q2': {'1': 500}}}
+</code></pre>
+
+<p>This is not a trivial problem, because SQL generally does not like to return data in this format, just a string. However the JSON1 module is flexible enough and CTE provide us with enough expressing power.</p>
+<p>Let's see the final query first and then we will try to understand it piece by piece.</p>
+<pre><code>WITH quarters AS (
+  WITH weeks AS (
+      SELECT year, quarter, json_group_object(week, total) AS week_json 
+      FROM sales 
+      GROUP BY year, quarter
+      ) 
+  SELECT year, json_group_object(quarter, json(week_json)) AS quarters_json 
+  FROM weeks 
+  GROUP BY year
+) 
+SELECT json_group_object(year, json(quarters_json)) 
+FROM quarters;&quot;
+</code></pre>
+
+<p>This returns exactly the single line we are looking for. </p>
+<p>It seems a difficult query, but working on it piece by piece we can understand it quickly.</p>
+<p>The <code>WITH</code> constructor simply create a "virtual table" valid for the execution of the query.</p>
+<p>The simplest way to understand this query is going inside-out.</p>
+<pre><code>SELECT year, quarter, json_group_object(week, total) AS week_json 
+FROM sales 
+GROUP BY year, quarter
+</code></pre>
+
+<p><code>json_group_object</code> is an aggreate query and it returns a JSON string with the <code>week</code>s as key and the <code>total</code>s as values.</p>
+<pre><code>&gt; REDISQL.EXEC DB &quot;SELECT year, quarter, json_group_object(week, total) AS week_json FROM sales GROUP BY year, quarter&quot; 
+1) 1) (integer) 2019
+   2) &quot;q1&quot;
+   3) &quot;{\&quot;1\&quot;:100,\&quot;2\&quot;:125}&quot;
+2) 1) (integer) 2019
+   2) &quot;q2&quot;
+   3) &quot;{\&quot;1\&quot;:200,\&quot;2\&quot;:300}&quot;
+3) 1) (integer) 2020
+   2) &quot;q1&quot;
+   3) &quot;{\&quot;1\&quot;:400,\&quot;2\&quot;:450}&quot;
+4) 1) (integer) 2020
+   2) &quot;q2&quot;
+   3) &quot;{\&quot;1\&quot;:500}&quot;
+</code></pre>
+
+<p>In this way we are able to create a JSON document that express the total of sales for each week. We compres the week columns in a flat JSON document.</p>
+<p>The next step is similar, for the year, we compress each quarter in a JSON document, the difficulties lays in maintaining the total of the weeks.</p>
+<pre><code class="SQL">WITH weeks AS (
+    --- same query as above
+    SELECT year, quarter, json_group_object(week, total) AS week_json 
+    FROM sales 
+    GROUP BY year, quarter
+) 
+  SELECT year, json_group_object(quarter, json(week_json)) AS quarters_json 
+  FROM weeks 
+  GROUP BY year
+</code></pre>
+
+<p>We introduce the <code>WITH</code> statement. 
+Using the <code>WITH</code> statement we treat the result of the query above as a new table that we can use in the later statement, the new table is called <code>week</code>.
+Note how we conveniently associate a name (<code>week_json</code>) to the result of the <code>json_group_object</code> aggregation. This is useful to manipulate that JSON object.</p>
+<p>The rest of the query is very similar, we are compressing all the quarters into a flat JSON object.</p>
+<pre><code>&gt; REDISQL.EXEC DB &quot;WITH weeks AS ( SELECT year, quarter, json_group_object(week, total) AS week_json FROM sales GROUP BY year, quarter) SELECT year, json_group_object(quarter, json(week_json)) AS quarters_json FROM weeks GROUP BY year&quot;
+1) 1) (integer) 2019
+   2) &quot;{\&quot;q1\&quot;:{\&quot;1\&quot;:100,\&quot;2\&quot;:125},\&quot;q2\&quot;:{\&quot;1\&quot;:200,\&quot;2\&quot;:300}}&quot;
+2) 1) (integer) 2020
+   2) &quot;{\&quot;q1\&quot;:{\&quot;1\&quot;:400,\&quot;2\&quot;:450},\&quot;q2\&quot;:{\&quot;1\&quot;:500}}&quot;
+</code></pre>
+
+<p>This query provided us, for each year, a JSON hierarchical structure that map quarters and weeks tp total sales.</p>
+<p>Now, we can guess the last step, compress the years into another hierarchical JSON structure.</p>
+<p>This yield to the original query:</p>
+<pre><code class="SQL">WITH quarters AS (
+  --- same query as above
+  WITH weeks AS (
+      SELECT year, quarter, json_group_object(week, total) AS week_json 
+      FROM sales 
+      GROUP BY year, quarter
+      ) 
+  SELECT year, json_group_object(quarter, json(week_json)) AS quarters_json 
+  FROM weeks 
+  GROUP BY year
+) 
+SELECT json_group_object(year, json(quarters_json)) 
+FROM quarters;&quot;
+</code></pre>
+
+<p>And let's see the result:</p>
+<pre><code>&gt; REDISQL.EXEC DB &quot;WITH quarters AS ( WITH weeks AS ( SELECT year, quarter, json_group_object(week, total) AS week_json FROM sales GROUP BY year, quarter ) SELECT year, json_group_object(quarter, json(week_json)) AS quarters_json FROM weeks GROUP BY year) SELECT json_group_object(year, json(quarters_json)) FROM quarters;&quot;
+
+1) 1) &quot;{\&quot;2019\&quot;:{\&quot;q1\&quot;:{\&quot;1\&quot;:100,\&quot;2\&quot;:125},\&quot;q2\&quot;:{\&quot;1\&quot;:200,\&quot;2\&quot;:300}},\&quot;2020\&quot;:{\&quot;q1\&quot;:{\&quot;1\&quot;:400,\&quot;2\&quot;:450},\&quot;q2\&quot;:{\&quot;1\&quot;:500}}}&quot;
+</code></pre>
+
+<p>The last result is a hierarchical JSON structure where the years map to the quartes, the quarters map to the weeks and the weeks map to the sales. </p></div>
             
         </div>
 
